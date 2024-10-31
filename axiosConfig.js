@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+export const BASE_URL = 'https://looi-store-server-1.onrender.com';
+
 const instance = axios.create({
-  baseURL: 'http://localhost:8000',
+  // baseURL: 'http://localhost:8000',
+  baseURL: BASE_URL,
 
   headers: {
     'Accept': 'application/json',
@@ -20,6 +23,5 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 
 export default instance;

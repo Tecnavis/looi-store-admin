@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../../../axiosConfig';
 import Swal from 'sweetalert2';
@@ -9,6 +10,7 @@ const AddProduct = () => {
   const [formData, setFormData] = useState({
     // productId:'',
     name: '',
+    oldPrice: '',
     price: '',
     sizes: [],
     description: '',
@@ -21,7 +23,7 @@ const AddProduct = () => {
     subcategory: '',
     coverImage: '',
   });
-  
+
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,9 +34,11 @@ const AddProduct = () => {
   const [currentImages, setCurrentImages] = useState([]);
   const [colors, setColors] = useState([]);
   const [coverImage, setCoverImage] = useState(null);
-  
+  const [filteredSubCategories, setFilteredSubCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
   const imageInputRef = useRef();
-  
+
   useEffect(() => {
     const fetchCategories = async () => {
       const token = localStorage.getItem('token');
@@ -63,32 +67,63 @@ const AddProduct = () => {
 
   }, []);
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
 
+  //   if (name === 'currentSize') {
+  //     setCurrentSize(value);
+  //   } else {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       [name]: value,
+  //     }));
+  //   }
+  // };
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === 'currentSize') {
       setCurrentSize(value);
+    } else if (name === 'subcategory') {
+      // Handle subcategory selection
+      const selectedSubcategory = subCategories.find(sub => sub._id === value);
+      
+      if (selectedSubcategory) {
+        // Set the category data
+        setSelectedCategory(selectedSubcategory.category);
+        
+        // Update formData
+        setFormData(prev => ({ 
+          ...prev, 
+          subcategory: value,
+          maincategory: selectedSubcategory.category.maincategoriesData 
+        }));
+      } else {
+        setSelectedCategory(null);
+        setFormData(prev => ({ 
+          ...prev, 
+          subcategory: value,
+          maincategory: '' 
+        }));
+      }
     } else {
-      setFormData((prev) => ({
+      // Handle all other form fields
+      setFormData(prev => ({
         ...prev,
         [name]: value,
       }));
     }
   };
+
   const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
     setCoverImage(file);
   };
 
-
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setCurrentImages(files);
   };
-
-  
-
 
   const handleAddSize = () => {
     if (currentSize && currentColor && currentStock > 0 && currentImages.length > 0) {
@@ -147,6 +182,7 @@ const AddProduct = () => {
     setFormData({
       // productId: '',
       name: '',
+      oldPrice: '',
       price: '',
       sizes: [],
       description: '',
@@ -198,7 +234,6 @@ const AddProduct = () => {
         formDataToSend.append('coverImage', coverImage);
       }
 
-
       // Log the sizes data before processing
       console.log('Sizes data before processing:', JSON.stringify(formData.sizes, null, 2));
 
@@ -239,7 +274,6 @@ const AddProduct = () => {
         },
       });
 
-     
       if (response.status === 200) {
         MySwal.fire({
           title: 'Product Added!',
@@ -256,7 +290,7 @@ const AddProduct = () => {
         clearForm();
       }
 
-     
+
     } catch (err) {
       console.error('Error adding product:', err);
       setError({ submit: 'Failed to add product: ' + (err.response?.data?.message || err.message) });
@@ -269,250 +303,254 @@ const AddProduct = () => {
     <div className="container mt-4">
       <h1 className="mb-4">Add Product</h1>
       <form onSubmit={handleSubmit}>
-        <div className="row">
-          {/* <div className="col-md-6 mb-3">
-            <label className="form-label">Product ID</label>
-            <input
-              type="text"
-              className="form-control"
-              name="productId"
-              value={formData.productId}
-              onChange={handleChange}
-            />
-            {error.productId && <div className="text-danger">{error.productId}</div>}
+
+        <div className="top-div p-5" style={{ border: '1px solid grey', borderRadius: '10px' }}>
+
+
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Product Name</label>
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+              {error.name && <div className="text-danger">{error.name}</div>}
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Country of Origin</label>
+              <input
+                type="text"
+                className="form-control"
+                name="countryOfOrigin"
+                value={formData.countryOfOrigin}
+                onChange={handleChange}
+              />
+              {error.countryOfOrigin && <div className="text-danger">{error.countryOfOrigin}</div>}
+            </div>
+            <div className="col-md-6 mb-3 ">
+              <label className="form-label">Old Price</label>
+              <input
+                type="number"
+                className="form-control w-100"
+                name="oldPrice"
+                value={formData.oldPrice}
+                onChange={handleChange}
+              />
+              {error.oldPrice && <div className="text-danger">{error.oldPrice}</div>}
+            </div>
+            <div className="col-md-6 mb-3 ">
+              <label className="form-label ">New Price</label>
+              <input
+                type="number"
+                className="form-control w-100"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+              />
+              {error.price && <div className="text-danger">{error.price}</div>}
+            </div>
+          </div>
+
+
+          {/* <div className="row">
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Sub Category</label>
+              <select
+                className="form-select"
+                name="subcategory"
+                value={formData.subcategory}
+                onChange={handleChange}
+              >
+                <option value="">Select Sub Category</option>
+                {subCategories.map((subcategory) => (
+                  <option key={subcategory._id} value={subcategory._id}>{subcategory.subcategoryname}</option>
+                ))}
+              </select>
+              {error.subcategory && <div className="text-danger">{error.subcategory}</div>}
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Main Category</label>
+              <select
+                className="form-select"
+                name="maincategory"
+                value={formData.maincategory}
+                onChange={handleChange}
+              >
+                <option value="">Select Main Category</option>
+                {mainCategories.map((category) => (
+                  <option key={category._id} value={category._id}>{category.name}</option>
+                ))}
+              </select>
+              {error.maincategory && <div className="text-danger">{error.maincategory}</div>}
+            </div>
+
+
           </div> */}
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Product Name</label>
-            <input
-              type="text"
-              className="form-control"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-            />
-            {error.name && <div className="text-danger">{error.name}</div>}
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Price</label>
-            <input
-              type="number"
-              className="form-control"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-            />
-            {error.price && <div className="text-danger">{error.price}</div>}
-          </div>
-        </div>
+         <div className="row">
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Sub Category</label>
+        <select
+          className="form-select"
+          name="subcategory"
+          value={formData.subcategory}
+          onChange={handleChange}
+        >
+          <option value="">Select Sub Category</option>
+          {subCategories.map((subcategory) => (
+            <option key={subcategory._id} value={subcategory._id}>
+              {subcategory.subcategoryname}
+            </option>
+          ))}
+        </select>
+        {error.subcategory && <div className="text-danger">{error.subcategory}</div>}
+      </div>
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Main Category</label>
+        <input
+          type="text"
+          className="form-control"
+          value={selectedCategory ? selectedCategory.name : ''}
+          disabled
+        />
+        {/* Hidden input to store the actual maincategory value */}
+        <input 
+          type="hidden" 
+          name="maincategory" 
+          value={formData.maincategory}
+        />
+        {error.maincategory && <div className="text-danger">{error.maincategory}</div>}
+      </div>
+    </div>
 
+          <div className="row">
 
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Main Category</label>
-            <select
-              className="form-select"
-              name="maincategory"
-              value={formData.maincategory}
-              onChange={handleChange}
-            >
-              <option value="">Select Main Category</option>
-              {mainCategories.map((category) => (
-                <option key={category._id} value={category._id}>{category.name}</option>
-              ))}
-            </select>
-            {error.maincategory && <div className="text-danger">{error.maincategory}</div>}
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Sub Category</label>
-            <select
-              className="form-select"
-              name="subcategory"
-              value={formData.subcategory}
-              onChange={handleChange}
-            >
-              <option value="">Select Sub Category</option>
-              {subCategories.map((subcategory) => (
-                <option key={subcategory._id} value={subcategory._id}>{subcategory.subcategoryname}</option>
-              ))}
-            </select>
-            {error.subcategory && <div className="text-danger">{error.subcategory}</div>}
-          </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Manufacturer</label>
+              <input
+                type="text"
+                className="form-control"
+                name="manufacturer"
+                value={formData.manufacturer}
+                onChange={handleChange}
+              />
+              {error.manufacturer && <div className="text-danger">{error.manufacturer}</div>}
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Packed By</label>
+              <input
+                type="text"
+                className="form-control"
+                name="packedBy"
+                value={formData.packedBy}
+                onChange={handleChange}
+              />
+              {error.packedBy && <div className="text-danger">{error.packedBy}</div>}
+            </div>
 
-
-
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Country of Origin</label>
-            <input
-              type="text"
-              className="form-control"
-              name="countryOfOrigin"
-              value={formData.countryOfOrigin}
-              onChange={handleChange}
-            />
-            {error.countryOfOrigin && <div className="text-danger">{error.countryOfOrigin}</div>}
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Manufacturer</label>
-            <input
-              type="text"
-              className="form-control"
-              name="manufacturer"
-              value={formData.manufacturer}
-              onChange={handleChange}
-            />
-            {error.manufacturer && <div className="text-danger">{error.manufacturer}</div>}
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Packed By</label>
-            <input
-              type="text"
-              className="form-control"
-              name="packedBy"
-              value={formData.packedBy}
-              onChange={handleChange}
-            />
-            {error.packedBy && <div className="text-danger">{error.packedBy}</div>}
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Commodity</label>
-            <input
-              type="text"
-              className="form-control"
-              name="commodity"
-              value={formData.commodity}
-              onChange={handleChange}
-            />
-            {error.commodity && <div className="text-danger">{error.commodity}</div>}
-          </div>
-        </div>
-
-
-        {/* 
-        <label className="form-label">Add Color</label>
-        <div className="col-md-6 mb-3">
-          <input
-            type="text"
-            className="form-control"
-
-            value={currentColor}
-            onChange={(e) => setCurrentColor(e.target.value)}
-          />
-        </div>
-
-
-        <div className="col-md-2 mb-2">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              if (currentColor && !colors.includes(currentColor)) {
-                setColors([...colors, currentColor]); // Add the new color
-                setCurrentColor(''); // Clear the input after adding
-              }
-            }}
-          >
-            Add Color
-          </button>
-        </div>
-        
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Description</label>
-            <textarea
-              className="form-control"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-            />
-            {error.description && <div className="text-danger">{error.description}</div>}
-          </div> */}
-
-        <div className="row align-items-center">
-          {/* Color Input and Button */}
-
-
-          {/* Description Textarea */}
-          <div className="col-md-6">
-            <label className="form-label">Description</label>
-            <textarea
-              className="form-control"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-            />
-            {error.description && <div className="text-danger">{error.description}</div>}
           </div>
 
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Cover Image</label>
-            <input
-              type="file"
-              className="form-control"
-              name="coverImage"
-              onChange={handleCoverImageChange}
-              ref={imageInputRef} 
-            />
-          </div>
-        </div>
+          <div className="row">
 
-        <div className="col-md-6 mt-3 d-flex">
-          <div className="me-2 flex-grow-1">
-            <label className="form-label">Add Color</label>
-            <input
-              type="text"
-              className="form-control"
-              value={currentColor}
-              onChange={(e) => setCurrentColor(e.target.value)}
-            />
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Commodity</label>
+              <input
+                type="text"
+                className="form-control"
+                name="commodity"
+                value={formData.commodity}
+                onChange={handleChange}
+              />
+              {error.commodity && <div className="text-danger">{error.commodity}</div>}
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Cover Image</label>
+              <input
+                type="file"
+                className="form-control"
+                name="coverImage"
+                onChange={handleCoverImageChange}
+                ref={imageInputRef}
+              />
+            </div>
           </div>
-          <div className="mt-auto">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => {
-                if (currentColor && !colors.includes(currentColor)) {
-                  setColors([...colors, currentColor]); // Add the new color
-                  setCurrentColor(''); // Clear the input after adding
-                }
-              }}
-            >
-              Add Color
-            </button>
+
+          <div className="row align-items-center">
+            {/* Color Input and Button */}
+
+
+            {/* Description Textarea */}
+            <div className="col-md-6">
+              <label className="form-label">Description</label>
+              <textarea
+                className="form-control"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+              />
+              {error.description && <div className="text-danger">{error.description}</div>}
+            </div>
+
+            <div className="col-md-6 mt-3 d-flex">
+              <div className="me-2 flex-grow-1">
+                <label className="form-label">Add Color</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={currentColor}
+                  onChange={(e) => setCurrentColor(e.target.value)}
+                />
+              </div>
+              <div className="mt-auto">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    if (currentColor && !colors.includes(currentColor)) {
+                      setColors([...colors, currentColor]); // Add the new color
+                      setCurrentColor(''); // Clear the input after adding
+                    }
+                  }}
+                >
+                  Add Color
+                </button>
+              </div>
+            </div>
           </div>
+
         </div>
 
         <div className="mb-3 mt-5">
-          <h5 className='text-center'>Add Size, Color, Stock, and Images</h5>
-          <div className="row mt-4">
-            <div className="col-md-3 mb-2">
-              {/* <input
+          <div className="top-div p-5" style={{ border: '1px solid grey', borderRadius: '10px' }}>
+
+            <h5 className='text-center'>Add Size, Color, Stock, and Images</h5>
+            <div className="row mt-4">
+              <div className="col-md-3 mb-2">
+                {/* <input
                 type="text"
                 className="form-control"
                 placeholder="Size"
                 value={currentSize}
                 onChange={(e) => setCurrentSize(e.target.value)}
               /> */}
-              <select
-                className="form-select"
-                name="currentSize"
-                value={currentSize}
-                onChange={handleChange}
-              >
-                <option value="">Select Size</option>
-                {availableSizes.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <select
+                  className="form-select"
+                  name="currentSize"
+                  value={currentSize}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Size</option>
+                  {availableSizes.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* <div className="col-md-3 mb-2">
+              {/* <div className="col-md-3 mb-2">
               <input
                 type="text"
                 className="form-control"
@@ -522,94 +560,85 @@ const AddProduct = () => {
               />
 
             </div> */}
-            <div className="col-md-2 mb-2">
-              {/* <label className="form-label">Select Color</label> */}
-              <select
-                className="form-control"
-                value={currentColor}
-                onChange={(e) => setCurrentColor(e.target.value)}
-                disabled={!colors.length}
-              >
-                <option value="">Select a color</option>
-                {colors.map((color, index) => (
-                  <option key={index} value={color}>{color}</option>
-                ))}
-              </select>
-            </div>
-
-
-            <div className="col-md-2 mb-2">
-              <input
-                type="number"
-                className="form-control"
-                placeholder="Stock"
-                value={currentStock}
-                onChange={(e) => setCurrentStock(parseInt(e.target.value))}
-              />
-            </div>
-            <div className="col-md-4 mb-2">
-              <input
-                type="file"
-                className="form-control"
-                multiple
-                accept=".jpg, .jpeg, .png" // Specify allowed file types
-                ref={imageInputRef}
-                onChange={handleFileChange}
-              />
-
-            </div>
-          </div>
-          <div className="div text-center mt-4"><button type="button" className="btn btn-secondary " onClick={handleAddSize}>Add Size/Color</button>
-          </div>
-          {error.size && <div className="text-danger mt-2">{error.size}</div>}
-        </div>
-        {/* 
-        <div className="mb-3">
-          <h5>Added Sizes/Colors:</h5>
-          {formData.sizes.map((size, sizeIndex) => (
-            <div key={sizeIndex}>
-              Size: {size.size}
-              {size.colors.map((color, colorIndex) => (
-                <div key={colorIndex}>
-                  Color: {color.color}, Stock: {color.stock}, Images: {color.images.length}
-                </div>
-              ))}
-            </div>
-          ))}
-          {error.sizes && <div className="text-danger">{error.sizes}</div>}
-        </div> */}
-
-        <div className="mb-3">
-          <h5>Added Sizes/Colors:</h5>
-          {formData.sizes.length > 0 ? (
-            formData.sizes.map((size, sizeIndex) => (
-              <div key={sizeIndex} className="size-section mb-2 p-2 border border-primary rounded">
-                <strong>Size:</strong> {size.size}
-                <div className="color-section mt-1">
-                  {size.colors.map((color, colorIndex) => (
-                    <div key={colorIndex} className="color-item p-2 mb-2 border border-secondary rounded">
-                      <strong>Color:</strong> {color.color},
-                      <strong> Stock:</strong> {color.stock},
-                      <strong> Images:</strong> {color.images.length}
-                    </div>
+              <div className="col-md-2 mb-2">
+                {/* <label className="form-label">Select Color</label> */}
+                <select
+                  className="form-control"
+                  value={currentColor}
+                  onChange={(e) => setCurrentColor(e.target.value)}
+                  disabled={!colors.length}
+                >
+                  <option value="">Select a color</option>
+                  {colors.map((color, index) => (
+                    <option key={index} value={color}>{color}</option>
                   ))}
-                </div>
+                </select>
               </div>
-            ))
-          ) : (
-            <div>No sizes or colors added yet.</div>
-          )}
-          {error.sizes && <div className="text-danger">{error.sizes}</div>}
+
+
+              <div className="col-md-2 mb-2">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Stock"
+                  value={currentStock}
+                  onChange={(e) => setCurrentStock(parseInt(e.target.value))}
+                />
+              </div>
+              <div className="col-md-4 mb-2">
+                <input
+                  type="file"
+                  className="form-control"
+                  multiple
+                  accept=".jpg, .jpeg, .png" // Specify allowed file types
+                  ref={imageInputRef}
+                  onChange={handleFileChange}
+                />
+
+              </div>
+            </div>
+            <div className="div text-center mt-4"><button type="button" className="btn btn-secondary " onClick={handleAddSize}>Add Size/Color</button>
+            </div>
+            {error.size && <div className="text-danger mt-2">{error.size}</div>}
+          </div>
+
+
+          <div className="mb-3 mt-2">
+            <h5>Added Sizes/Colors:</h5>
+            {formData.sizes.length > 0 ? (
+              formData.sizes.map((size, sizeIndex) => (
+                <div key={sizeIndex} className="size-section mb-2 p-2 border border-primary rounded">
+                  <strong>Size:</strong> {size.size}
+                  <div className="color-section mt-1">
+                    {size.colors.map((color, colorIndex) => (
+                      <div key={colorIndex} className="color-item p-2 mb-2 border border-secondary rounded">
+                        <strong>Color:</strong> {color.color},
+                        <strong> Stock:</strong> {color.stock},
+                        <strong> Images:</strong> {color.images.length}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div>No sizes or colors added yet.</div>
+            )}
+            {error.sizes && <div className="text-danger">{error.sizes}</div>}
+          </div>
+
+          <div className="div m-4 text-center "> <button type="submit" className="btn btn-primary " disabled={loading}>
+            {loading ? 'Adding Product...' : 'Add Product'}
+          </button></div>
+
+          {error.submit && <div className="text-danger mt-2">{error.submit}</div>}
         </div>
-
-        <div className="div m-4 text-center "> <button type="submit" className="btn btn-primary " disabled={loading}>
-          {loading ? 'Adding Product...' : 'Add Product'}
-        </button></div>
-
-        {error.submit && <div className="text-danger mt-2">{error.submit}</div>}
       </form>
     </div>
+
+
   );
 };
 
 export default AddProduct;
+
+

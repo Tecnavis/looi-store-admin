@@ -13,8 +13,8 @@ const AllCustomer = () => {
                 <div className="panel">
                     <AllCustomerHeader/>
                     <div className="panel-body">
-                        <HeaderBtn/>
-                        <AllCustomerTableFilter/>
+                        {/* <HeaderBtn/> */}
+                        {/* <AllCustomerTableFilter/> */}
                         <AllCustomerTable/>
                     </div>
                 </div>

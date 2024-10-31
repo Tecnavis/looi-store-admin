@@ -137,7 +137,7 @@ const AppsPart = () => {
             onClick={toggleEcommerceDropdown}
           >
             <span className="nav-icon">
-              <i className="fa-light fa-cart-shopping-fast"></i>
+            <i class="fa-solid fa-list"></i>
             </span>{' '}
             <span className="sidebar-txt">Category</span>
           </Link>
@@ -255,17 +255,32 @@ const AppsPart = () => {
           </NavLink>
         </li>
 
+        <li className="sidebar-dropdown-item">
+          <NavLink to="/adsbanner" className="sidebar-link">
+            <span className="nav-icon">
+            <i class="fa-regular fa-note-sticky"></i>
+            </span>{' '}
+            <span className="sidebar-txt">Ads Banner</span>
+          </NavLink>
+        </li>
+
+        <li className="sidebar-dropdown-item">
+          <NavLink to="/addprint" className="sidebar-link">
+            <span className="nav-icon">
+        <i class="fa-solid fa-note-sticky"></i>
+                        </span>{' '}
+            <span className="sidebar-txt">Add Prints</span>
+          </NavLink>
+        </li>
 
         <li className="sidebar-dropdown-item">
           <NavLink to="/allCustomer" className="sidebar-link">
             <span className="nav-icon">
-              <i className="fa-light fa-calendar"></i>
-            </span>{' '}
+            <i class="fa-solid fa-people-group"></i>
+                        </span>{' '}
             <span className="sidebar-txt">All Customer</span>
           </NavLink>
         </li>
-
-        
 
         <li className="sidebar-dropdown-item">
           <NavLink to="/order" className="sidebar-link">
@@ -277,14 +292,14 @@ const AppsPart = () => {
         </li>
 
 
-        <li className="sidebar-dropdown-item">
+        {/* <li className="sidebar-dropdown-item">
           <NavLink to="/calendar" className="sidebar-link">
             <span className="nav-icon">
               <i className="fa-light fa-calendar"></i>
             </span>{' '}
             <span className="sidebar-txt">Calendar</span>
           </NavLink>
-        </li>
+        </li> */}
         {/* <li className="sidebar-dropdown-item">
           <NavLink to="/chat" className="sidebar-link">
             <span className="nav-icon">
@@ -301,14 +316,14 @@ const AppsPart = () => {
             <span className="sidebar-txt">Email</span>
           </NavLink>
         </li> */}
-        <li className="sidebar-dropdown-item">
+        {/* <li className="sidebar-dropdown-item">
           <NavLink to="/invoices" className="sidebar-link">
             <span className="nav-icon">
               <i className="fa-light fa-file-invoice"></i>
             </span>{' '}
             <span className="sidebar-txt">Invoices</span>
           </NavLink>
-        </li>
+        </li> */}
         {/* <li className="sidebar-dropdown-item">
           <NavLink to="/contacts" className="sidebar-link">
             <span className="nav-icon">

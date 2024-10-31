@@ -24,7 +24,7 @@ const OrderTableFilter = () => {
             <div className="col-xl-10 col-10 col-xs-12">
                 <div className="row g-3">
                     <div className="col">
-                        <form className="row g-2">
+                        {/* <form className="row g-2">
                             <div className="col">
                                 <Form.Select className="form-control form-control-sm">
                                     <option value="0">Bulk action</option>
@@ -38,7 +38,7 @@ const OrderTableFilter = () => {
                             <div className="col">
                                 <button className="btn btn-sm btn-primary w-100">Apply</button>
                             </div>
-                        </form>
+                        </form> */}
                     </div>
                     <div className="col">
                         <Form.Select className="form-control form-control-sm">

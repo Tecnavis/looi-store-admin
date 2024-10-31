@@ -13,8 +13,8 @@ const OrderMainContent = () => {
                 <div className="panel">
                    <OrderHeader/>
                     <div className="panel-body">
-                        <HeaderBtn/>
-                        <OrderTableFilter/>
+                        {/* <HeaderBtn/> */}
+                        {/* <OrderTableFilter/> */}
                         <OrderListTable/>
                     </div>
                 </div>

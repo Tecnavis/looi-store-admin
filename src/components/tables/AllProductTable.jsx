@@ -216,6 +216,7 @@ const AllProductTable = () => {
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const BASE_URL = 'https://looi-store-server-1.onrender.com';
 
 
   // Fetch all products from the API
@@ -240,7 +241,6 @@ const AllProductTable = () => {
 
     fetchProducts();
   }, []);
-
 
 
   // Handle loading and error states
@@ -380,7 +380,7 @@ const AllProductTable = () => {
                   <td>
                     {data.coverImage ? (
                       <img
-                        src={`http://localhost:8000/uploads/${data.coverImage}`}
+                        src={`${BASE_URL}/uploads/${data.coverImage}`}
                         alt="Cover Image"
                         style={{ width: '50px', height: '80px' }} // Adjust size as needed
                       />
