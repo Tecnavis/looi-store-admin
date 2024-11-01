@@ -203,6 +203,8 @@ import axiosInstance from '../../../axiosConfig';
 import EditProduct from '../../pages/products/editproduct';
 import Swal from 'sweetalert2'; // Import SweetAlert
 
+const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://looi-store-server-1.onrender.com'
+
 const AllProductTable = () => {
   const [products, setProducts] = useState([]); // State to hold product data
   const [currentPage, setCurrentPage] = useState(1);
@@ -216,7 +218,7 @@ const AllProductTable = () => {
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
-  const BASE_URL = 'https://looi-store-server-1.onrender.com';
+  // const BASE_URL = 'https://looi-store-server-1.onrender.com';
 
 
   // Fetch all products from the API

@@ -9,6 +9,9 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
+const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://looi-store-server-1.onrender.com'
+
+
 const AllProductTable = () => {
     const [products, setProducts] = useState([]); // State to hold product data
     const [currentPage, setCurrentPage] = useState(1);
@@ -107,8 +110,6 @@ const AllProductTable = () => {
         }
     };
 
-  
-
     return (
         <>
             <OverlayScrollbarsComponent>
@@ -135,7 +136,7 @@ const AllProductTable = () => {
                                                 data.images.map((item, imgIndex) => (
                                                     <img
                                                         key={imgIndex}
-                                                        src={`http://localhost:8000/uploads/${item}`}
+                                                        src={`${BASE_URL}/uploads/${item}`}
                                                         alt={`Banner Image ${imgIndex}`}
                                                         style={{ width: '100px', height: 'auto', objectFit: 'contain' }}
                                                     />

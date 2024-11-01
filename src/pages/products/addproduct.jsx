@@ -213,7 +213,6 @@ const AddProduct = () => {
     e.preventDefault();
     setError({});
 
-
     setLoading(true);
 
     try {
@@ -277,7 +276,7 @@ const AddProduct = () => {
       if (response.status === 200) {
         MySwal.fire({
           title: 'Product Added!',
-          text: `Product "${formData.name}"  was successfully added.`,
+          text: `Product "${formData.name}" was successfully added.`,
           icon: 'success',
           confirmButtonClass: 'btn btn-sm btn-primary',
           buttonsStyling: false,

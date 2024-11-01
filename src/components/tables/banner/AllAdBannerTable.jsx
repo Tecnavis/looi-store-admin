@@ -177,6 +177,9 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
+const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://looi-store-server-1.onrender.com'
+
+
 const AllAdBannerTable = () => {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -289,7 +292,7 @@ const AllAdBannerTable = () => {
                                         <div className="part-img">
                                             {data.image ? (
                                                 <img
-                                                    src={`http://localhost:8000/uploads/${data.image}`}
+                                                    src={`${BASE_URL}/uploads/${data.image}`}
                                                     alt="Banner Image"
                                                     style={{ width: '100px', height: 'auto', objectFit: 'contain' }}
                                                 />
