@@ -7,7 +7,7 @@ import axiosInstance from '../../../axiosConfig';
 
 const OrderListTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [dataPerPage] = useState(10);
+    const [dataPerPage] = useState(15);
     const [orderList, setOrderList] = useState([]);
 
     useEffect(() => {
@@ -61,7 +61,7 @@ const OrderListTable = () => {
                             <th>Product</th>
                             <th>Price</th>
                             <th>Payment Method</th>
-                            <th>Delivery Status</th>
+                            <th>Payment Status</th>
                             <th>Order Date</th>
                             <th>Action</th>
                         </tr>

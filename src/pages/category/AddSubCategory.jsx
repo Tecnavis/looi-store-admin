@@ -4,6 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import axiosInstance from '../../../axiosConfig';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'; 
+import { Spinner } from 'react-bootstrap'; 
 
 const MySwal = withReactContent(Swal);
 
@@ -17,6 +18,8 @@ const AddSubCategory = () => {
     const [errors, setErrors] = useState({});
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [previewImages, setPreviewImages] = useState([]);
+    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -41,6 +44,9 @@ const AddSubCategory = () => {
                 console.error('Error fetching categories:', err);
             }
         };
+        setTimeout(() => {
+            setLoading(false);  // Set loading to false once setup is done
+          }, 1000);
 
         fetchCategories();
     }, []);
@@ -161,6 +167,15 @@ const AddSubCategory = () => {
         onDrop,
         accept: 'image/*',
     });
+    if (loading) {
+        return (
+          <div className="d-flex align-items-center justify-content-center" style={{ height: '100vh' }}>
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </div>
+        );
+      }
 
     return (
         <div className="row align-items-center justify-content-center mt-5">

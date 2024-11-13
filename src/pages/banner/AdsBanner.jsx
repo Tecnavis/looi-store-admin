@@ -1,13 +1,23 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axiosInstance from '../../../axiosConfig';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import AllAdBannerTable from '../../components/tables/banner/AllAdBannerTable';
 const MySwal = withReactContent(Swal);
+import { Spinner } from 'react-bootstrap'; 
+
 
 const AdsBanner = () => {
   const [uploadStatus, setUploadStatus] = useState('');
+  const[loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate an API call or other setup tasks
+    setTimeout(() => {
+        setLoading(false);  // Set loading to false once setup is done
+    }, 1000);  // Example delay, replace with actual data fetch or setup logic if needed
+}, []);
 
   const onDropMultiple = useCallback(async (acceptedFiles) => {
     const formData = new FormData();
@@ -55,6 +65,16 @@ const AdsBanner = () => {
     onDrop: onDropMultiple,
     multiple: true,
   });
+
+  if (loading) {
+    return (
+      <div className="d-flex align-items-center justify-content-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <div className="col-12 mt-5">

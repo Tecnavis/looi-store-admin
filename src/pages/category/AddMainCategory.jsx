@@ -1,193 +1,11 @@
 
-// import React, { useCallback, useState, useEffect } from 'react';
-// import axiosInstance from '../../../axiosConfig'; 
-// import { useDropzone } from 'react-dropzone';
-// import Swal from 'sweetalert2';
-// import withReactContent from 'sweetalert2-react-content';
-
-// const MySwal = withReactContent(Swal);
-
-// const AddMainCategory = () => {
-//     const [showThumbnail, setShowThumbnail] = useState(false);
-//     const [maincategoriesData, setMaincategoriesData] = useState([]);
-//     const [categoryTitle, setCategoryTitle] = useState('');
-//     const [selectedMainCategory, setSelectedMainCategory] = useState('');
-//     const [categoryTitleError, setCategoryTitleError] = useState('');
-//     const [mainCategoryError, setMainCategoryError] = useState('');
-    
-
-//   const clearForm = () => {
-//     setCategoryTitle('');
-//     setSelectedMainCategory('');
-//     setError('');
-//   };
-
-//     const handleShowThumbnail = () => {
-//         setShowThumbnail(!showThumbnail);
-//     };
-
-//     const onDropSingle = useCallback((acceptedFiles) => {
-//         // Handle the single file upload
-//         console.log(acceptedFiles);
-//     }, []);
-
-//     const { getRootProps: getSingleRootProps, getInputProps: getSingleInputProps, isDragActive: isSingleDragActive } = useDropzone({ onDrop: onDropSingle });
-
-//     // Fetch main categories from the backend
-//     useEffect(() => {
-//       const fetchCategories = async () => {
-//         const token = localStorage.getItem('token'); // Get the token from localStorage
-//         try {
-//             const response = await axiosInstance.get('/get-maincategory', {
-//                 headers: {
-//                     Authorization: `Bearer ${token}`,  // JWT token for Authorization
-//                     'Content-Type': 'application/json',  // Set the content type
-//                 },
-//             });
-//             setMaincategoriesData(response.data); // Update the state with fetched categories
-//         } catch (err) {
-//             console.error('Error fetching main categories:', err);
-//         }
-//     };
-
-//       fetchCategories();
-//   }, []);
-  
-//   // Validation for categoryTitle while typing
-//   const handleCategoryTitleChange = (e) => {
-//       const value = e.target.value;
-//       setCategoryTitle(value);
-//       if (!value) {
-//           setCategoryTitleError('Main Category title is required');
-//       } else {
-//           setCategoryTitleError(''); // Clear error if valid
-//       }
-//   };
-
-//   // Validation for selectedMainCategory while selecting
-//   const handleMainCategoryChange = (e) => {
-//       const value = e.target.value;
-//       setSelectedMainCategory(value);
-//       if (!value) {
-//           setMainCategoryError('Please select a category');
-//       } else {
-//           setMainCategoryError(''); // Clear error if valid
-//       }
-//   };
-
-//   const handleSubmit = async (e) => {
-//       e.preventDefault();
-
-//       // Check for validation before submitting
-//       if (!categoryTitle) {
-//           setCategoryTitleError('Main Category  is required');
-//       }
-      
-//       if (!selectedMainCategory) {
-//           setMainCategoryError('Please select a  category');
-//           return;  // Prevent form submission if main category is not selected
-//       }
-
-//       const token = localStorage.getItem('token');
-//       try {
-//           const response = await axiosInstance.post(
-//               '/add-category', 
-//               {
-//                   name: categoryTitle,
-//                   maincategoriesData: selectedMainCategory,
-//               }, 
-//               {
-//                 headers: {
-//                   Authorization: `Bearer ${token}`,  
-//                   'Content-Type': 'application/json',  
-//                 },
-//               }
-//           );
-//           if (response.status === 200) {
-
-//               MySwal.fire({
-//           title: 'Main Category Added!',
-//           text: `Main Category "${categoryTitle}" was successfully added.`,
-//           icon: 'success',
-//           confirmButtonClass: 'btn btn-sm btn-primary',
-//           buttonsStyling: false,
-//           showCloseButton: true,
-//           closeButtonHtml: "<i class='fa-light fa-xmark'></i>",
-//           customClass: {
-//             closeButton: 'btn btn-sm btn-icon btn-danger',
-//           },
-//         });
-//         clearForm();
-//           }
-//       } catch (err) {
-//           console.error('Error adding category:', err);
-          
-//       }
-//   };
-
-//     return (
-//         <div className="row align-items-center justify-content-center mt-5">
-//             <div className="col-xxl-4 col-md-5">
-//                 <div className="panel">
-//                     <div className="panel-header">
-//                         <h5>Add Main Category</h5>
-//                     </div>
-//                     <div className="panel-body">
-//                         <form onSubmit={handleSubmit}>
-//                             <div className="row g-3">
-//                                 <div className="col-12 mt-4">
-//                                     <label className="form-label">Category</label>
-//                                     <select
-//                                         className="form-control form-control-sm"
-//                                         value={selectedMainCategory}
-//                                         onChange={handleMainCategoryChange}
-//                                     >
-//                                         <option value="">Select</option>
-//                                         {maincategoriesData.map((category) => (
-//                                             <option key={category._id} value={category._id}>
-//                                                 {category.mainCategoryName}
-//                                             </option>
-//                                         ))}
-//                                     </select>
-//                                     {mainCategoryError && <p style={{fontSize:'12px'}} className="text-danger">{mainCategoryError}</p>}
-//                                 </div>
-//                                 <div className="col-12 mt-4">
-//                                     <label className="form-label">Main Category</label>
-//                                     <input
-//                                         type="text"
-//                                         className="form-control form-control-sm"
-//                                         id="categoryTitle"
-//                                         value={categoryTitle}
-//                                         onChange={handleCategoryTitleChange}
-//                                     />
-//                                     {categoryTitleError && <p style={{fontSize:'12px'}} className="text-danger">{categoryTitleError}</p>}
-//                                 </div>
-                                
-//                                 <div className="col-12 d-flex justify-content-end">
-//                                     <div className="btn-box">
-//                                         <button type="submit" className="btn btn-sm btn-primary">
-//                                             Save Category
-//                                         </button>
-//                                     </div>
-//                                 </div>
-//                             </div>
-//                         </form>
-//                     </div>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default AddMainCategory;
-
-
-
 import React, { useCallback, useState, useEffect } from 'react';
 import axiosInstance from '../../../axiosConfig'; 
 import { useDropzone } from 'react-dropzone';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { Spinner } from 'react-bootstrap'; 
+
 
 const MySwal = withReactContent(Swal);
 
@@ -200,8 +18,7 @@ const AddMainCategory = () => {
     const [mainCategoryError, setMainCategoryError] = useState('');
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [previewImages, setPreviewImages] = useState([]);
-
-    
+    const [loading, setLoading] = useState(true);
 
   const clearForm = () => {
     setCategoryTitle('');
@@ -238,6 +55,9 @@ const AddMainCategory = () => {
             console.error('Error fetching main categories:', err);
         }
     };
+    setTimeout(() => {
+        setLoading(false);  // Set loading to false once setup is done
+      }, 1000);
 
       fetchCategories();
   }, []);
@@ -332,6 +152,16 @@ const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: 'image/*',
 });
+
+if (loading) {
+    return (
+      <div className="d-flex align-items-center justify-content-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
 
     return (

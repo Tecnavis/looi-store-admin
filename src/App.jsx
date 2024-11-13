@@ -148,7 +148,7 @@
 //         <Route path="/swiperSlider" element={<ProtectedRoute><SwiperSlider /></ProtectedRoute>} />
 //         <Route path="/form" element={<ProtectedRoute><Form /></ProtectedRoute>} />
 //         <Route path="/table" element={<ProtectedRoute><Table /></ProtectedRoute>} />
-//         <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
+        // <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
 //         <Route path="/icon" element={<ProtectedRoute><Icon /></ProtectedRoute>} />
 //         <Route path="/map" element={<ProtectedRoute><Map /></ProtectedRoute>} />
 //       </Route>
@@ -161,12 +161,13 @@
 
 // export default App
 
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./protected-route/protected-route";
 import { AuthProvider } from "./context/AuthContext";
+import Charts from "./pages/Charts"
+
 
 // Lazy-loaded components
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -192,6 +193,7 @@ const AddBanner = lazy(() => import('./pages/banner/AddBanner'));
 const AdsBanner = lazy(() => import('./pages/banner/AdsBanner'));
 const AddPrint=lazy(()=>import('./pages/products/addprints'))
 const Order=lazy(()=>import('./pages/Order'))
+
 
 // Public components (no lazy-loading needed if they're small)
 import Login from "./pages/Login";
@@ -224,6 +226,7 @@ function App() {
             <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
             <Route path="/allCustomer" element={<ProtectedRoute><AllCustomer /></ProtectedRoute>} />
             <Route path="/addNewProduct" element={<ProtectedRoute><AddNewProduct /></ProtectedRoute>} />
+            <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
         
            
             

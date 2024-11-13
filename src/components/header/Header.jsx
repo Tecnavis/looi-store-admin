@@ -40,7 +40,7 @@ const Header = () => {
                 <div className="main-logo d-lg-block d-none">
                     <div className="logo-big">
                         <Link to="/">
-                            <img src={`${isLightTheme? "assets/images/logo-black.png":"assets/images/logo-small.png"}`} alt="Logo"/>
+                            <img src={`${isLightTheme? "assets/images/logo-black.png":"assets/images/LOOI.png"}`} alt="Logo" width={isLightTheme? "70px":"70px"}/>
                         </Link>
                     </div>
                     <div className="logo-small">

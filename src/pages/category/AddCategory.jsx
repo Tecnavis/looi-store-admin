@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axiosInstance from '../../../axiosConfig';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { Spinner } from 'react-bootstrap'; 
 
 const MySwal = withReactContent(Swal);
 
@@ -10,6 +11,14 @@ const AddCategory = () => {
   const [categoryTitle, setCategoryTitle] = useState('');
   const [error, setError] = useState('');
   const [showThumbnail, setShowThumbnail] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate an API call or other setup tasks
+    setTimeout(() => {
+      setLoading(false);  // Set loading to false once setup is done
+    }, 1000);  // Example delay, replace with actual data fetch or setup logic if needed
+  }, []);
 
   const handleShowThumbnail = () => {
     setShowThumbnail(!showThumbnail);
@@ -95,6 +104,16 @@ const AddCategory = () => {
       }
     }
   };
+  // Display loader while loading is true
+  if (loading) {
+    return (
+      <div className="d-flex align-items-center justify-content-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <div className="row align-items-center justify-content-center mt-5">
