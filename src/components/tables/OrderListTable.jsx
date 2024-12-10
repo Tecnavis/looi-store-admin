@@ -5,12 +5,45 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import PaginationSection from './PaginationSection';
 import axiosInstance from '../../../axiosConfig';
 import Swal from 'sweetalert2';
+import { Modal, Button, Form } from 'react-bootstrap';
 
 const OrderListTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [dataPerPage] = useState(15);
     const [orderList, setOrderList] = useState([]);
 
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editOrder, setEditOrder] = useState({});
+    
+    const openEditModal = (order) => {
+        setEditOrder(order);
+        setShowEditModal(true);
+    };
+    
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditOrder((prev) => ({ ...prev, [name]: value }));
+    };
+    
+    const handleUpdateOrder = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await axiosInstance.put(`/update-order/${editOrder._id}`, editOrder, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setOrderList((prev) =>
+                prev.map((order) => (order._id === editOrder._id ? editOrder : order))
+            );
+            setShowEditModal(false);
+            Swal.fire('Success', 'Order updated successfully', 'success');
+        } catch (err) {
+            console.error('Error updating order:', err);
+            Swal.fire('Error', 'Failed to update order', 'error');
+        }
+    };
+    
     useEffect(() => {
         const fetchOrderList = async () => {
             const token = localStorage.getItem('token');
@@ -80,6 +113,7 @@ const handleDelete = async (id) => {
                 <h4>No orders found</h4>
             </div>
             )
+            
     return (
         <>
             <OverlayScrollbarsComponent>
@@ -116,12 +150,12 @@ const handleDelete = async (id) => {
                                 <td>{order.orderItems.map(item => item.quantity).join(', ')}</td>
                                 <td>${order.totalAmount}</td>
                                 <td>{order.paymentMethod}</td>
-                                <td><span className={`badge ${order.paymentStatus === 'Pending' ? 'badge-warning' : 'badge-success'}`}>{order.paymentStatus}</span></td>
+                                <td><span className="text-success">{order.paymentStatus}</span></td>
                                 <td>{new Date(order.orderDate).toLocaleDateString()}</td>
                                 <td>
                                     <div className="btn-box">
                                         <button><i className="fa-light fa-eye"></i></button>
-                                        <button><i className="fa-light fa-pen"></i></button>
+                                        <button onClick={() => openEditModal(order)}><i className="fa-light fa-pen"></i></button>
                                         <button onClick={() => handleDelete(order._id)}><i className="fa-light fa-trash"></i></button>
                                     </div>
                                 </td>
@@ -131,6 +165,87 @@ const handleDelete = async (id) => {
                 </Table>
             </OverlayScrollbarsComponent>
             <PaginationSection currentPage={currentPage} totalPages={totalPages} paginate={paginate} pageNumbers={pageNumbers}/>
+            <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+    <Modal.Header closeButton>
+        <Modal.Title>Edit Order</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        <Form>
+            <Form.Group>
+                <Form.Label>Order Status</Form.Label>
+                <Form.Select
+                    name="orderStatus"
+                    value={editOrder.orderStatus}
+                    onChange={handleEditChange}
+                >
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                </Form.Select>
+            </Form.Group><br/>
+            <Form.Group>
+                <Form.Label>Total Amount</Form.Label>
+                <Form.Control
+                    type="number"
+                    name="totalAmount"
+                    value={editOrder.totalAmount}
+                    onChange={handleEditChange}
+                />
+            </Form.Group><br/>
+            <Form.Group>
+                <Form.Label>Payment Method</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="paymentMethod"
+                    value={editOrder.paymentMethod}
+                    onChange={handleEditChange}
+                />
+            </Form.Group><br/>
+            <Form.Group>
+                <Form.Label>Payment Status</Form.Label>
+                <Form.Select
+                    name="paymentStatus"
+                    value={editOrder.paymentStatus}
+                    onChange={handleEditChange}
+                >
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Failed">Failed</option>
+                </Form.Select>
+            </Form.Group><br/>
+            <Form.Group>
+                <Form.Label>Order Date</Form.Label>
+                <Form.Control
+                    type="date"
+                    name="orderDate"
+                    value={editOrder.orderDate}
+                    onChange={handleEditChange}
+                />
+            </Form.Group><br/>
+            <Form.Group>
+                <Form.Label>Cancellation Date</Form.Label>
+                <Form.Control
+                    type="date"
+                    name="cancellationDate"
+                    value={editOrder.cancellationDate}
+                    onChange={handleEditChange}
+                />
+            </Form.Group><br/>
+            {/* Add other fields as needed */}
+        </Form>
+    </Modal.Body>
+    <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            Close
+        </Button>
+        <Button variant="primary" onClick={handleUpdateOrder}>
+            Save Changes
+        </Button>
+    </Modal.Footer>
+</Modal>
+{/* 'orderDate', 'cancellationDate' */}
         </>
     );
 };
