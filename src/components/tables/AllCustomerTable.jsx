@@ -57,9 +57,22 @@ const AllCustomerTable = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSelectedUser((prev) => ({ ...prev, [name]: value }));
+  
+    if (name.startsWith('address')) {
+      const [_, index, field] = name.split('.');
+      setSelectedUser((prev) => {
+        const updatedAddress = [...(prev.address || [])];
+        updatedAddress[index] = {
+          ...updatedAddress[index],
+          [field]: value,
+        };
+        return { ...prev, address: updatedAddress };
+      });
+    } else {
+      setSelectedUser((prev) => ({ ...prev, [name]: value }));
+    }
   };
-
+  
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token');
     try {
@@ -98,7 +111,11 @@ const AllCustomerTable = () => {
             <tr>
               <th className="no-sort">
                 <div className="form-check">
-                  <input className="form-check-input" type="checkbox" id="markAllProduct" />
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="markAllProduct"
+                  />
                 </div>
               </th>
               <th>Full Name</th>
@@ -133,13 +150,23 @@ const AllCustomerTable = () => {
                 <td>{displayData(data.address?.[0]?.streetArea)}</td>
                 <td>{displayData(data.address?.[0]?.houseBuilding)}</td>
                 <td>{displayData(data.address?.[0]?.landmark)}</td>
-                <td>{displayData(new Date(data.createdAt).toLocaleDateString())}</td>
+                <td>
+                  {displayData(new Date(data.createdAt).toLocaleDateString())}
+                </td>
                 <td>
                   <div>
-                  <button className="btn btn-sm" onClick={() => handleEdit(data)}>
-                    <i className="fa-light fa-pen-to-square"></i>
-                  </button>
-                    <button className="btn btn-sm" onClick={() => handleDelete(data._id)}><i className='fa-light fa-trash'></i></button>
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleEdit(data)}
+                    >
+                      <i className="fa-light fa-pen-to-square"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleDelete(data._id)}
+                    >
+                      <i className="fa-light fa-trash"></i>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -147,9 +174,14 @@ const AllCustomerTable = () => {
           </tbody>
         </Table>
       </OverlayScrollbarsComponent>
-      <PaginationSection currentPage={currentPage} totalPages={totalPages} paginate={paginate} pageNumbers={pageNumbers} />
-       {/* Edit User Modal */}
-       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+      <PaginationSection
+        currentPage={currentPage}
+        totalPages={totalPages}
+        paginate={paginate}
+        pageNumbers={pageNumbers}
+      />
+      {/* Edit User Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Edit User</Modal.Title>
         </Modal.Header>
@@ -161,37 +193,91 @@ const AllCustomerTable = () => {
                 <Form.Control
                   type="text"
                   name="fullName"
-                  value={selectedUser.fullName || ''}
+                  value={selectedUser.fullName || ""}
                   onChange={handleChange}
                 />
-              </Form.Group><br/>
+              </Form.Group>
+              <br />
               <Form.Group>
                 <Form.Label>User Name</Form.Label>
                 <Form.Control
                   type="text"
                   name="username"
-                  value={selectedUser.username || ''}
+                  value={selectedUser.username || ""}
                   onChange={handleChange}
                 />
-              </Form.Group><br/>
+              </Form.Group>
+              <br />
               <Form.Group>
                 <Form.Label>Email</Form.Label>
                 <Form.Control
                   type="email"
                   name="email"
-                  value={selectedUser.email || ''}
+                  value={selectedUser.email || ""}
                   onChange={handleChange}
                 />
-              </Form.Group><br/>
+              </Form.Group>
+              <br />
               <Form.Group>
                 <Form.Label>Phone Number</Form.Label>
                 <Form.Control
                   type="text"
-                  name="address[0].phoneNumber"
-                  value={selectedUser.address?.[0]?.phoneNumber || ''}
+                  name="address.0.phoneNumber"
+                  value={selectedUser?.address?.[0]?.phoneNumber || ""}
                   onChange={handleChange}
                 />
-              </Form.Group><br/>
+              </Form.Group>
+              <br />
+              <Form.Group>
+                <Form.Label>City/District</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="address.0.cityDistrict"
+                  value={selectedUser?.address?.[0]?.cityDistrict || ""}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <br />
+              <Form.Group>
+                <Form.Label>Postal Code</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="address.0.postalCode"
+                  value={selectedUser?.address?.[0]?.postalCode || ""}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <br />
+              <Form.Group>
+                <Form.Label>Street/Area</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="address.0.streetArea"
+                  value={selectedUser?.address?.[0]?.streetArea || ""}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <br />
+              <Form.Group>
+                <Form.Label>House/Building</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="address.0.houseBuilding"
+                  value={selectedUser?.address?.[0]?.houseBuilding || ""}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <br />
+              <Form.Group>
+                <Form.Label>Landmark</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="address.0.landmark"
+                  value={selectedUser?.address?.[0]?.landmark || ""}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <br/>
               <Button variant="primary" type="submit">
                 Save Changes
               </Button>
