@@ -1,16 +1,13 @@
-
 import React, { useEffect, useState } from 'react';
 import { Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import PaginationSection from './PaginationSection';
 import axiosInstance from '../../../axiosConfig';
-
 const AllCustomerTable = () => {
   const [customers, setCustomers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataPerPage] = useState(15);
-
   useEffect(() => {
     const fetchCustomers = async () => {
       const token = localStorage.getItem('token');
@@ -26,26 +23,21 @@ const AllCustomerTable = () => {
         console.log('Error fetching customers', err);
       }
     };
-
     fetchCustomers();
   }, []);
-
   // Pagination logic
   const indexOfLastData = currentPage * dataPerPage;
   const indexOfFirstData = indexOfLastData - dataPerPage;
   const currentData = customers.slice(indexOfFirstData, indexOfLastData);
-
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-
   // Calculate total number of pages
   const totalPages = Math.ceil(customers.length / dataPerPage);
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
-
   // Function to safely display data or 'Nil'
   const displayData = (data) => (data ? data : 'Nil');
 
@@ -70,6 +62,7 @@ const AllCustomerTable = () => {
               <th>House/Building</th>
               <th>Landmark</th>
               <th>Date Registered</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -92,6 +85,12 @@ const AllCustomerTable = () => {
                 <td>{displayData(data.address?.[0]?.houseBuilding)}</td>
                 <td>{displayData(data.address?.[0]?.landmark)}</td>
                 <td>{displayData(new Date(data.createdAt).toLocaleDateString())}</td>
+                <td>
+                  <div>
+                    <button className="btn btn-sm"><i className='fa-light fa-pen'></i></button>
+                    <button className="btn btn-sm"><i className='fa-light fa-trash'></i></button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
