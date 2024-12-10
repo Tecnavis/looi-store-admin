@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import PaginationSection from './PaginationSection';
 import axiosInstance from '../../../axiosConfig';
+import Swal from 'sweetalert2';
 
 const OrderListTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -43,7 +44,42 @@ const OrderListTable = () => {
     for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
     }
-
+//delete order by id
+const handleDelete = async (id) => {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    });
+    if (result.isConfirmed) {
+        try {
+            await axiosInstance.delete(`/delete-order/${id}`);
+            setOrderList(orderList.filter(order => order._id !== id));
+            await Swal.fire(
+                'Deleted!',
+                'Your order has been deleted.',
+                'success'
+            );
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            await Swal.fire(
+                'Error',
+                'An error occurred while deleting the order.',
+                'error'
+            );
+        }
+    }    
+};
+    if (orderList.length === 0)
+        return (
+            <div className="text-center mt-5">
+                <h4>No orders found</h4>
+            </div>
+            )
     return (
         <>
             <OverlayScrollbarsComponent>
@@ -86,7 +122,7 @@ const OrderListTable = () => {
                                     <div className="btn-box">
                                         <button><i className="fa-light fa-eye"></i></button>
                                         <button><i className="fa-light fa-pen"></i></button>
-                                        <button><i className="fa-light fa-trash"></i></button>
+                                        <button onClick={() => handleDelete(order._id)}><i className="fa-light fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
