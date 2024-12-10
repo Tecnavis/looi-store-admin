@@ -197,7 +197,7 @@ const handleDelete = async (id) => {
                                 <td>{order.user?.email}</td>
                                 <td><span className="text-danger">{order.orderStatus}</span></td>
                                 <td>{order.orderItems.map(item => item.quantity).join(', ')}</td>
-                                <td>${order.totalAmount}</td>
+                                <td>₹{order.totalAmount}</td>
                                 <td>{order.paymentMethod}</td>
                                 <td><span className="text-success">{order.paymentStatus}</span></td>
                                 <td>{new Date(order.orderDate).toLocaleDateString()}</td>
@@ -323,14 +323,14 @@ const handleDelete = async (id) => {
                     <ul style={styles.itemList}>
                         {orderDetails.orderItems.map(item => (
                             <li key={item._id} style={styles.item}>
-                                {item.productName} - {item.quantity} x ${item.price}
+                                {item.productName} - {item.quantity} x ₹{item.price}
                             </li>
                         ))}
                     </ul>
                 </div>
                 <div style={styles.section}>
                     <p style={styles.label}>Total Amount:</p>
-                    <p style={styles.detail}>${orderDetails.totalAmount}</p>
+                    <p style={styles.detail}>₹{orderDetails.totalAmount}</p>
                 </div>
             </div>
         ) : (

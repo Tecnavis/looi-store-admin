@@ -210,7 +210,7 @@ const AllProductTable = () => {
                   </td> */}
                   <td>{data.productId}</td>
                   <td>{data.name}</td>
-                  <td>${data.price}</td>
+                  <td>₹{data.price}</td>
                   <td>
                     {/* Dropdown for sizes */}
                     {data.sizes && data.sizes.length > 0 ? (
