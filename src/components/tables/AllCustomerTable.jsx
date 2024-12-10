@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import PaginationSection from './PaginationSection';
 import axiosInstance from '../../../axiosConfig';
-
+import * as XLSX from 'xlsx';
 const AllCustomerTable = () => {
   const [customers, setCustomers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -102,10 +102,33 @@ const AllCustomerTable = () => {
   }
 
   const displayData = (data) => (data ? data : 'Nil');
+  const handleDownload = () => {
+    const formattedData = customers.map((customer) => ({
+      FullName: customer.fullName || 'Nil',
+      Username: customer.username || 'Nil',
+      Email: customer.email || 'Nil',
+      PhoneNumber: customer.address?.[0]?.phoneNumber || 'Nil',
+      CityDistrict: customer.address?.[0]?.cityDistrict || 'Nil',
+      PostalCode: customer.address?.[0]?.postalCode || 'Nil',
+      StreetArea: customer.address?.[0]?.streetArea || 'Nil',
+      HouseBuilding: customer.address?.[0]?.houseBuilding || 'Nil',
+      Landmark: customer.address?.[0]?.landmark || 'Nil',
+      DateRegistered: new Date(customer.createdAt).toLocaleDateString() || 'Nil',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Customers');
+    XLSX.writeFile(workbook, 'Customers.xlsx');
+  };
 
   return (
     <>
       <OverlayScrollbarsComponent>
+        <div className='d-flex justify-content-between align-items-center'>
+        <button className="btn btn-sm btn-success" onClick={handleDownload}>Download</button>
+        </div>
+        <br/>
         <Table className="table table-dashed table-hover digi-dataTable all-product-table table-striped">
           <thead>
             <tr>
