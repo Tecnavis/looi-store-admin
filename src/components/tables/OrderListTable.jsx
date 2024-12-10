@@ -11,7 +11,8 @@ const OrderListTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [dataPerPage] = useState(15);
     const [orderList, setOrderList] = useState([]);
-
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [orderDetails, setOrderDetails] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editOrder, setEditOrder] = useState({});
     
@@ -60,7 +61,24 @@ const OrderListTable = () => {
             }
         };
         fetchOrderList();
-    }, []);
+    }, []); 
+    const handleViewDetails = async (orderId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axiosInstance.get(`/getOrders/${orderId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            setOrderDetails(response.data.order);
+            setShowDetailsModal(true);
+        } catch (err) {
+            console.error('Error fetching order details:', err);
+            Swal.fire('Error', 'Failed to fetch order details', 'error');
+        }
+    };
+    
         
     // Pagination logic
     const indexOfLastData = currentPage * dataPerPage;
@@ -154,7 +172,7 @@ const handleDelete = async (id) => {
                                 <td>{new Date(order.orderDate).toLocaleDateString()}</td>
                                 <td>
                                     <div className="btn-box">
-                                        <button><i className="fa-light fa-eye"></i></button>
+                                        <button onClick={() => handleViewDetails(order._id)}><i className="fa-light fa-eye"></i></button>
                                         <button onClick={() => openEditModal(order)}><i className="fa-light fa-pen"></i></button>
                                         <button onClick={() => handleDelete(order._id)}><i className="fa-light fa-trash"></i></button>
                                     </div>
@@ -245,7 +263,41 @@ const handleDelete = async (id) => {
         </Button>
     </Modal.Footer>
 </Modal>
-{/* 'orderDate', 'cancellationDate' */}
+{/* ///view */}
+<Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)}>
+    <Modal.Header closeButton>
+        <Modal.Title>Order Details</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        {orderDetails ? (
+            <>
+                <h5>Order ID: {orderDetails.orderId}</h5>
+                <h6>Customer: {orderDetails.user.name} ({orderDetails.user.email})</h6>
+                <h6>Order Status: {orderDetails.orderStatus}</h6>
+                <h6>Payment Status: {orderDetails.paymentStatus}</h6>
+                <h6>Order Date: {new Date(orderDetails.orderDate).toLocaleDateString()}</h6>
+                
+                <h6>Order Items:</h6>
+                <ul>
+                    {orderDetails.orderItems.map(item => (
+                        <li key={item._id}>
+                            {item.productName} - {item.quantity} x ${item.price}
+                        </li>
+                    ))}
+                </ul>
+                <h6>Total Amount: ${orderDetails.totalAmount}</h6>
+            </>
+        ) : (
+            <p>Loading...</p>
+        )}
+    </Modal.Body>
+    <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
+            Close
+        </Button>
+    </Modal.Footer>
+</Modal>
+
         </>
     );
 };
