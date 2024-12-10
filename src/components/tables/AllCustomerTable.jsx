@@ -38,9 +38,22 @@ const AllCustomerTable = () => {
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
-  // Function to safely display data or 'Nil'
   const displayData = (data) => (data ? data : 'Nil');
-
+//delete user by id
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axiosInstance.delete(`/delete-user/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      setCustomers((prevData) => prevData.filter((data) => data._id !== id));
+    } catch (err) {
+      console.log('Error deleting user', err);
+    }
+  }
   return (
     <>
       <OverlayScrollbarsComponent>
@@ -88,7 +101,7 @@ const AllCustomerTable = () => {
                 <td>
                   <div>
                     <button className="btn btn-sm"><i className='fa-light fa-pen'></i></button>
-                    <button className="btn btn-sm"><i className='fa-light fa-trash'></i></button>
+                    <button className="btn btn-sm" onClick={() => handleDelete(data._id)}><i className='fa-light fa-trash'></i></button>
                   </div>
                 </td>
               </tr>
