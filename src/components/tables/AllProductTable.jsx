@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'react-bootstrap';
+import { Button, Modal, Table } from 'react-bootstrap';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import PaginationSection from './PaginationSection';
 import axiosInstance from '../../../axiosConfig';
 import EditProduct from '../../pages/products/editproduct';
 import Swal from 'sweetalert2'; // Import SweetAlert
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://looi-store-server-ypdx.onrender.com'
+
+
+const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://api.looi.in'
 
 const AllProductTable = () => {
   const [products, setProducts] = useState([]); // State to hold product data
@@ -22,6 +24,9 @@ const AllProductTable = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   // const BASE_URL = 'https://looi-store-server-1.onrender.com';
+
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
 
   // Fetch all products from the API
@@ -56,6 +61,18 @@ const AllProductTable = () => {
   const handleEditButtonClick = (product) => {
     setSelectedProductId(product._id);
     setShowEditModal(true);
+  };
+
+  // Handle "View" button click
+  const handleViewButtonClick = (product) => {
+    setSelectedProduct(product);
+    setShowDetailModal(true);
+  };
+
+  // Handle modal close
+  const handleDetailModalClose = () => {
+    setShowDetailModal(false);
+    setSelectedProduct(null);
   };
 
   // Handle modal close
@@ -255,7 +272,9 @@ const AllProductTable = () => {
                   </td>
                   <td>
                     <div className="btn-box">
-                      <button><i className="fa-light fa-eye"></i>
+                      <button onClick={() => handleViewButtonClick(data)}>
+                        <i className="fa-light fa-eye"></i>
+                        {/* <button><i className="fa-light fa-eye"></i> */}
                       </button>
                       <button>
                         <i className="fa-light fa-pen" onClick={() => handleEditButtonClick(data)}></i>
@@ -279,6 +298,41 @@ const AllProductTable = () => {
         productId={selectedProductId}
         onEdit={handleProductEdit}
       />
+
+      <Modal show={showDetailModal} onHide={handleDetailModalClose} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Product Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedProduct && (
+            <div>
+              <p><strong>Product ID:</strong> {selectedProduct.productId}</p>
+              <p><strong>Name:</strong> {selectedProduct.name}</p>
+              <p><strong>Old Price:</strong> {selectedProduct.oldPrice}</p>
+              <p><strong>Price:</strong> ${selectedProduct.price}</p>
+              <p><strong>Total Stock:</strong> {selectedProduct.totalStock}</p>
+              <p><strong>Description:</strong> {selectedProduct.description}</p>
+              <p><strong>Country of Origin:</strong> {selectedProduct.countryOfOrigin}</p>
+              <p><strong>Manufacturer:</strong> {selectedProduct.manufacturer}</p>
+              <p><strong>Packed By:</strong> {selectedProduct.packedBy}</p>
+              <p><strong>Commodity:</strong> {selectedProduct.commodity}</p>
+              <p><strong>HSN:</strong> {selectedProduct.hsn}</p>
+              <p><strong>SKU:</strong> {selectedProduct.sku}</p>
+              <p><strong>Length:</strong> {selectedProduct.length}</p>
+              <p><strong>Width:</strong> {selectedProduct.width}</p>
+              <p><strong>Height:</strong> {selectedProduct.height}</p>
+              <p><strong>Weight:</strong> {selectedProduct.weight}</p>
+
+              {/* Add more fields as needed */}
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleDetailModalClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
     </>
   );
