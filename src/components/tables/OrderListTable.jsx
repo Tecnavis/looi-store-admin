@@ -8,6 +8,37 @@ import Swal from 'sweetalert2';
 import { Modal, Button, Form } from 'react-bootstrap';
 
 const OrderListTable = () => {
+    const styles = {
+        section: {
+            marginBottom: '16px',
+            display: 'flex',
+        },
+        label: {
+            fontWeight: '600',
+            color: '#333',
+            marginBottom: '8px',
+        },
+        detail: {
+            fontSize: '1rem',
+            color: '#555',
+            marginBottom: '8px',
+            fontWeight: '500',
+        },
+        itemList: {
+            listStyleType: 'none',
+            paddingLeft: '0',
+            margin: '0',
+        },
+        item: {
+            fontSize: '1rem',
+            color: '#444',
+            marginBottom: '4px',
+        },
+        closeButton: {
+            fontWeight: '500',
+        }
+    };
+    
     const [currentPage, setCurrentPage] = useState(1);
     const [dataPerPage] = useState(15);
     const [orderList, setOrderList] = useState([]);
@@ -264,39 +295,56 @@ const handleDelete = async (id) => {
     </Modal.Footer>
 </Modal>
 {/* ///view */}
-<Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)}>
+<Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} centered size="lg">
     <Modal.Header closeButton>
         <Modal.Title>Order Details</Modal.Title>
     </Modal.Header>
     <Modal.Body>
         {orderDetails ? (
-            <>
-                <h5>Order ID: {orderDetails.orderId}</h5>
-                <h6>Customer: {orderDetails.user.name} ({orderDetails.user.email})</h6>
-                <h6>Order Status: {orderDetails.orderStatus}</h6>
-                <h6>Payment Status: {orderDetails.paymentStatus}</h6>
-                <h6>Order Date: {new Date(orderDetails.orderDate).toLocaleDateString()}</h6>
-                
-                <h6>Order Items:</h6>
-                <ul>
-                    {orderDetails.orderItems.map(item => (
-                        <li key={item._id}>
-                            {item.productName} - {item.quantity} x ${item.price}
-                        </li>
-                    ))}
-                </ul>
-                <h6>Total Amount: ${orderDetails.totalAmount}</h6>
-            </>
+            <div style={{ fontFamily: "'Roboto', sans-serif", fontSize: '1rem' }}>
+                <div style={styles.section}>
+                    <p style={styles.label}>Order ID:</p>
+                    <p style={styles.detail}>{orderDetails.orderId}</p>
+                </div>
+                <div style={styles.section}>
+                    <p style={styles.label}>Order Status:</p>
+                    <p style={styles.detail}>{orderDetails.orderStatus}</p>
+                </div>
+                <div style={styles.section}>
+                    <p style={styles.label}>Payment Status:</p>
+                    <p style={styles.detail}>{orderDetails.paymentStatus}</p>
+                </div>
+                <div style={styles.section}>
+                    <p style={styles.label}>Order Date:</p>
+                    <p style={styles.detail}>{new Date(orderDetails.orderDate).toLocaleDateString()}</p>
+                </div>
+                <div style={styles.section}>
+                    <p style={styles.label}>Order Items:</p>
+                    <ul style={styles.itemList}>
+                        {orderDetails.orderItems.map(item => (
+                            <li key={item._id} style={styles.item}>
+                                {item.productName} - {item.quantity} x ${item.price}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div style={styles.section}>
+                    <p style={styles.label}>Total Amount:</p>
+                    <p style={styles.detail}>${orderDetails.totalAmount}</p>
+                </div>
+            </div>
         ) : (
             <p>Loading...</p>
         )}
     </Modal.Body>
     <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
+        <Button variant="secondary" onClick={() => setShowDetailsModal(false)} style={styles.closeButton}>
             Close
         </Button>
     </Modal.Footer>
 </Modal>
+
+
 
         </>
     );
