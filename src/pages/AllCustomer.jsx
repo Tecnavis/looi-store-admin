@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Footer from '../components/footer/Footer'
 import AllCustomerHeader from '../components/header/AllCustomerHeader'
-import HeaderBtn from '../components/header/HeaderBtn'
-import AllCustomerTableFilter from '../components/filter/AllCustomerTableFilter'
 import AllCustomerTable from '../components/tables/AllCustomerTable'
 import { Spinner } from 'react-bootstrap'; 
 
