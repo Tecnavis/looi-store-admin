@@ -30,6 +30,7 @@ const AddBanner = lazy(() => import('./pages/banner/AddBanner'));
 const AdsBanner = lazy(() => import('./pages/banner/AdsBanner'));
 const AddPrint=lazy(()=>import('./pages/products/addprints'))
 const Order=lazy(()=>import('./pages/Order'))
+const InvoicePage=lazy(()=>import('./pages/InvoicePage'))
 
 
 // Public components (no lazy-loading needed if they're small)
@@ -77,6 +78,7 @@ function App() {
         <Route path="/adsbanner" element={<ProtectedRoute><AdsBanner/></ProtectedRoute> }/>
         <Route path="/addprint" element={<ProtectedRoute><AddPrint/></ProtectedRoute> }/>
         <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
+        <Route path="/invoicepage/:orderId" element={<ProtectedRoute><InvoicePage /></ProtectedRoute>} />
 
 
         <Route path="*" element={<Error404/>} />

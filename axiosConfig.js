@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env?.VITE_BASE_URL || 
-                 process.env?.REACT_APP_BASE_URL || 
-                 'https://looi-store-server-ypdx.onrender.com';
+// const BASE_URL = import.meta.env?.VITE_BASE_URL || 
+//                  process.env?.REACT_APP_BASE_URL || 
+//                  'https://looi-store-server-ypdx.onrender.com';
 
 const instance = axios.create({
-  // baseURL: 'http://localhost:8000',
+  baseURL: 'http://localhost:8000',
   // baseURL: process.env.REACT_APP_BASE_URL,
-  baseURL: BASE_URL,
+  // baseURL: BASE_URL,
 
   headers: {
     'Accept': 'application/json',

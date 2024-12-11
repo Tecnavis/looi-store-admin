@@ -226,7 +226,7 @@ const OrderListTable = () => {
                   </div>
                 </td>
                 <td>
-                  <Link to={`/invoices/${order.orderId}`}>{order.orderId}</Link>
+                  <Link to={`/invoicepage/${order.orderId}`}>{order.orderId}</Link>
                 </td>
                 <td>{order.user?.email}</td>
                 <td>
