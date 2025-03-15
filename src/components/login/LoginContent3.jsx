@@ -12,7 +12,7 @@ const LoginContent3 = () => {
             <div className="login-body">
                 <div className="top d-flex justify-content-between align-items-center">
                     <div className="logo">
-                    <img src={`${isLightTheme? "assets/images/logo-black.png":"assets/images/logo-big.png"}`} alt="Logo"/>
+                    <img src={`${isLightTheme? "assets/images/looi-bl.png":"assets/images/logo-big.png"}`} alt="Logo"/>
                     </div>
                     <Link to="/"><i className="fa-duotone fa-house-chimney"></i></Link>
                 </div>

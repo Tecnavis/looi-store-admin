@@ -7,7 +7,8 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
-
+const BASE_URL ="https://api.looi.in"
+// const BASE_URL ="http://localhost:8000"
 const AllPrintTable = () => {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -151,7 +152,7 @@ const AllPrintTable = () => {
                                         <div className="part-img">
                                             {data.image ? (
                                                 <img
-                                                    src={`http://localhost:8000/uploads/${data.image}`}
+                                                    src={`${BASE_URL}/uploads/${data.image}`}
                                                     alt="Banner Image"
                                                     style={{ width: '100px', height: 'auto', objectFit: 'contain' }}
                                                 />

@@ -28,7 +28,8 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
     });
     const [coverImageFile, setCoverImageFile] = useState(null);
     const [loading, setLoading] = useState(true);
-
+const BASE_URL = 'https://api.looi.in';
+// const BASE_URL = 'http://localhost:8000';
     useEffect(() => {
         const fetchProduct = async () => {
             if (!productId) return;
@@ -314,7 +315,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
                         {formData.coverImage && (
                             <div className="mb-2">
                                 <img
-                                    src={`http://localhost:8000/uploads/${formData.coverImage}`}
+                                    src={`${BASE_URL}/uploads/${formData.coverImage}`}
                                     alt="Product Cover"
                                     style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                                 />
@@ -386,7 +387,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
                                                     color.images.map((img, imgIndex) => (
                                                         <img
                                                             key={`existing-${imgIndex}`}
-                                                            src={`http://localhost:8000/uploads/${img}`}
+                                                            src={`${BASE_URL}/uploads/${img}`}
                                                             alt={`Existing ${color.color} ${imgIndex + 1}`}
                                                             style={{ width: '100px', height: '100px', objectFit: 'cover', margin: '0 10px 10px 0' }}
                                                         />
