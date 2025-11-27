@@ -1,19 +1,15 @@
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 
-// protected-route/protected-route.jsx
-import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";   // adjust path if needed
+// Simplified ProtectedRoute for admin.looi.in deployment
+// Uses a token in localStorage; if no token, redirect to /login.
+// Does NOT use window.location.href (avoids full page reloads).
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
   const location = useLocation();
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    // Not logged in → go to login, NOT 404
+  if (!token) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
@@ -21,4 +17,3 @@ const ProtectedRoute = ({ children }) => {
 };
 
 export default ProtectedRoute;
-
