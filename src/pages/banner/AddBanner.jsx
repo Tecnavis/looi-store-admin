@@ -57,7 +57,7 @@ const AddBanner = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        window.location.href = '/login';
+        navigate("/login", { replace: true });
         return;
       }
 
