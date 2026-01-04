@@ -8,3 +8,5 @@ const Login = () => {
 }
 
 export default Login
+// redirect after login
+navigate("/", { replace: true });
