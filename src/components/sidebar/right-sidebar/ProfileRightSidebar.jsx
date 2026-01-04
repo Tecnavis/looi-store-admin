@@ -15,7 +15,7 @@ const ProfileRightSidebar = () => {
     navigate('/login'); 
 
     // localStorage.removeItem("token");
-    // navigate("/login", { replace: true });
+    // window.location.href = '/login';
    
   };
 

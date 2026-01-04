@@ -21,7 +21,7 @@ instance.interceptors.response.use(
       // Clear any existing auth tokens
       localStorage.removeItem('token');
       // Redirect to login page
-      navigate("/login", { replace: true });
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
