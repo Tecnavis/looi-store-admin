@@ -14,14 +14,14 @@ const instance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+// axiosConfig.js
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       // Clear any existing auth tokens
       localStorage.removeItem('token');
-      // Redirect to login page
-      navigate("/login", { replace: true });
+      // Don't redirect here - let ProtectedRoute handle it
     }
     return Promise.reject(error);
   }
