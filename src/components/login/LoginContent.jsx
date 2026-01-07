@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Very simple login form for admin.looi.in
-// On submit it sets a dummy token in localStorage and redirects to the dashboard (/).
+import axiosInstance from '../../../axiosConfig';
 
 const LoginContent = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,14 +17,30 @@ const LoginContent = () => {
       return;
     }
 
+    setLoading(true);
+    setError('');
+
     try {
-      // TODO: Replace this with real API call if needed.
-      // For now, just mark user as "logged in".
-      localStorage.setItem('token', 'dummy-token');
-      setError('');
-      navigate('/', { replace: true });
+      // CORRECTED: Use '/admin-login' instead of '/admin/login'
+      const response = await axiosInstance.post('/admin-login', {
+        username,
+        password
+      });
+      
+      console.log('Login response:', response.data);
+      
+      // Save the real token from API response
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        navigate('/', { replace: true });
+      } else {
+        setError('No token received from server');
+      }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,20 +74,24 @@ const LoginContent = () => {
           </div>
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: '100%',
               padding: 10,
               borderRadius: 6,
               border: 'none',
-              background: '#22c55e',
+              background: loading ? '#666' : '#22c55e',
               color: '#000',
               fontWeight: 600,
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
             }}
           >
-            Sign in
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+        <div style={{ marginTop: 16, fontSize: 12, color: '#888', textAlign: 'center' }}>
+          Note: This login connects to your backend API
+        </div>
       </div>
     </div>
   );

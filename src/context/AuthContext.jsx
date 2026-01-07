@@ -1,25 +1,3 @@
-// import React, { createContext, useState, useContext } from 'react';
-
-// // Create the AuthContext
-// const AuthContext = createContext();
-
-// // AuthProvider component that wraps around the app
-// export const AuthProvider = ({ children }) => {
-//   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-//   return (
-//     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// // Custom hook to use the AuthContext in components
-// export const useAuth = () => {
-//   return useContext(AuthContext);
-// };
-
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 // Create the AuthContext
@@ -31,15 +9,40 @@ export const useAuth = () => useContext(AuthContext);
 // Create the AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true); // Add loading state to prevent flickering
+  const [loading, setLoading] = useState(true);
 
+  // Clear dummy token immediately on mount (synchronous)
   useEffect(() => {
-    // Check for token in localStorage on app load
     const token = localStorage.getItem('token');
-    if (token) {
-      setIsAuthenticated(true);
+    
+    // Clear dummy token immediately
+    if (token === 'dummy-token') {
+      localStorage.removeItem('token');
+      setIsAuthenticated(false);
+      setLoading(false);
+      return; // Exit early
     }
-    setLoading(false); // Set loading to false after checking
+  }, []); // Empty dependency array = runs once on mount
+
+  // Then check for valid token
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    
+    if (token && token !== 'dummy-token') {
+      // Optional: Validate token format here
+      const isValidToken = token.length > 20; // Basic check for JWT token
+      
+      if (isValidToken) {
+        setIsAuthenticated(true);
+      } else {
+        localStorage.removeItem('token');
+        setIsAuthenticated(false);
+      }
+    } else {
+      setIsAuthenticated(false);
+    }
+    
+    setLoading(false);
   }, []);
 
   const login = (token) => {
