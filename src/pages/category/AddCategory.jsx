@@ -10,24 +10,43 @@ const MySwal = withReactContent(Swal);
 const AddCategory = () => {
   const [categoryTitle, setCategoryTitle] = useState("");
   const [categoryImage, setCategoryImage] = useState(null);
+  const [mainCategories, setMainCategories] = useState([]);
+  const [mainCategoryId, setMainCategoryId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [btnLoading, setBtnLoading] = useState(false);
 
+  // ✅ Load main categories (backend has /get-maincategory)
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 800);
+    const loadMainCategories = async () => {
+      try {
+        const res = await axiosInstance.get("/api/get-maincategory");
+        setMainCategories(res.data || []);
+      } catch (err) {
+        console.error("Main category fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMainCategories();
   }, []);
 
-  const validateCategoryTitle = (title) => {
-    if (!title) return "Category name is required";
+  const validateForm = () => {
+    if (!categoryTitle.trim()) return "Category name is required";
+    if (!mainCategoryId) return "Main Category is required";
+    if (!categoryImage) return "Category image is required";
     return "";
   };
 
   const handleChange = (e) => {
-    const { value } = e.target;
-    setCategoryTitle(value);
-    setError(validateCategoryTitle(value));
+    setCategoryTitle(e.target.value);
+    setError("");
+  };
+
+  const handleMainCategoryChange = (e) => {
+    setMainCategoryId(e.target.value);
+    setError("");
   };
 
   // ✅ Dropzone file handler
@@ -46,40 +65,47 @@ const AddCategory = () => {
     onDrop: onDropSingle,
     multiple: false,
     accept: { "image/*": [] },
+    maxFiles: 1,
   });
 
   const clearForm = () => {
     setCategoryTitle("");
     setCategoryImage(null);
+    setMainCategoryId("");
     setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validationError = validateCategoryTitle(categoryTitle);
+    const validationError = validateForm();
     if (validationError) {
       setError(validationError);
       return;
     }
 
-    // ✅ Image required because backend expects upload.array('images', 1)
-    if (!categoryImage) {
-      setError("Category image is required");
-      return;
-    }
-
     try {
+      setBtnLoading(true);
+
       const token = localStorage.getItem("token");
 
       const formData = new FormData();
-      formData.append("categoryName", categoryTitle); // ✅ use your controller field name
-      formData.append("images", categoryImage); // ✅ MUST be "images"
+
+      // ✅ send common name keys (safe)
+      formData.append("categoryName", categoryTitle.trim());
+      formData.append("name", categoryTitle.trim());
+      formData.append("title", categoryTitle.trim());
+      formData.append("category", categoryTitle.trim());
+
+      // ✅ send mainCategoryId (MOST IMPORTANT for backend)
+      formData.append("mainCategoryId", mainCategoryId);
+
+      // ✅ file key must match backend: upload.array('images',1)
+      formData.append("images", categoryImage);
 
       const response = await axiosInstance.post("/api/add-category", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -89,23 +115,26 @@ const AddCategory = () => {
           text: `Category "${categoryTitle}" was successfully added.`,
           icon: "success",
         });
-
         clearForm();
       }
     } catch (err) {
       console.error("Error while adding category:", err);
 
-      if (err.response) {
-        if (err.response.status === 409 || err.response.status === 406) {
-          setError("Category already exists");
-        } else if (err.response.status === 401) {
-          setError("Unauthorized. Please login again.");
-        } else {
-          setError(err.response.data?.message || "Error adding category");
-        }
+      // ✅ Show backend error message
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data ||
+        "Error adding category";
+
+      if (err.response?.status === 401) {
+        setError("Unauthorized. Please login again.");
+      } else if (err.response?.status === 406 || err.response?.status === 409) {
+        setError("Category already exists");
       } else {
-        setError("Network error: Please try again later.");
+        setError(msg);
       }
+    } finally {
+      setBtnLoading(false);
     }
   };
 
@@ -133,14 +162,31 @@ const AddCategory = () => {
           <div className="panel-body">
             <form onSubmit={handleSubmit}>
               <div className="row g-3">
+                {/* ✅ Main Category Dropdown */}
+                <div className="col-12">
+                  <label className="form-label">Main Category</label>
+                  <select
+                    className="form-control form-control-sm"
+                    value={mainCategoryId}
+                    onChange={handleMainCategoryChange}
+                  >
+                    <option value="">-- Select Main Category --</option>
+                    {mainCategories.map((mc) => (
+                      <option key={mc?._id} value={mc?._id}>
+                        {mc?.mainCategoryName || mc?.name || "Main Category"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* ✅ Category Name */}
                 <div className="col-12">
                   <label className="form-label">Category Name</label>
                   <input
                     type="text"
                     className="form-control form-control-sm"
-                    id="categoryTitle"
-                    onChange={handleChange}
                     value={categoryTitle}
+                    onChange={handleChange}
                   />
                 </div>
 
@@ -179,8 +225,11 @@ const AddCategory = () => {
                 )}
 
                 <div className="col-12 d-flex justify-content-end">
-                  <button className="btn btn-sm btn-primary">
-                    Save Category
+                  <button
+                    className="btn btn-sm btn-primary"
+                    disabled={btnLoading}
+                  >
+                    {btnLoading ? "Saving..." : "Save Category"}
                   </button>
                 </div>
               </div>
