@@ -103,11 +103,12 @@ const AddCategory = () => {
       // ✅ file key must match backend: upload.array('images',1)
       formData.append("images", categoryImage);
 
-      const response = await axiosInstance.post("/api/add-category", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+     const response = await axiosInstance.post("/api/add-category", formData, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
 
       if (response.status === 200 || response.status === 201) {
         MySwal.fire({
