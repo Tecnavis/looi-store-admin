@@ -6,7 +6,7 @@ const BASE_URL =
   "https://looi-store-server-ypdx.onrender.com";
 
 const instance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: `${BASE_URL}/api`,
   headers: {
     Accept: "application/json",
   },

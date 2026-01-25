@@ -104,7 +104,7 @@ const AddCategory = () => {
       formData.append("images", categoryImage);
     }
 
-     const response = await axiosInstance.post("/api/add-category", formData, {
+     const response = await axiosInstance.post("/add-category", formData, {
   headers: {
     Authorization: `Bearer ${token}`,
   },
