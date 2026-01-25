@@ -20,7 +20,7 @@ const AddCategory = () => {
   useEffect(() => {
     const loadMainCategories = async () => {
       try {
-        const res = await axiosInstance.get("/api/get-maincategory");
+        const res = await axiosInstance.get("/get-maincategory");
         setMainCategories(res.data || []);
       } catch (err) {
         console.error("Main category fetch error:", err);

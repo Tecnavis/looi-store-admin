@@ -6,10 +6,12 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import AllBannerTable from '../../components/tables/banner/AllBannerTable';
 import { Spinner } from 'react-bootstrap'; 
+import { useNavigate } from 'react-router-dom';
 
 const MySwal = withReactContent(Swal);
 
 const AddBanner = () => {
+  const navigate = useNavigate();
   const [uploadStatus, setUploadStatus] = useState('');
   const [mainCategories, setMainCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
