@@ -22,7 +22,7 @@ const LoginContent = () => {
 
     try {
       // CORRECTED: Use '/admin-login' instead of '/admin/login'
-      const response = await axiosInstance.post('/admin-login', {
+      const response = await axiosInstance.post('/api/admin-login', {
         username,
         password
       });
