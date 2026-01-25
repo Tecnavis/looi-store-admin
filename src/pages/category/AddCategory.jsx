@@ -35,8 +35,7 @@ const AddCategory = () => {
   const validateForm = () => {
     if (!categoryTitle.trim()) return "Category name is required";
     if (!mainCategoryId) return "Main Category is required";
-    if (!categoryImage) return "Category image is required";
-    return "";
+        return "";
   };
 
   const handleChange = (e) => {
@@ -101,7 +100,9 @@ const AddCategory = () => {
       formData.append("mainCategoryId", mainCategoryId);
 
       // ✅ file key must match backend: upload.array('images',1)
+      if (categoryImage) {
       formData.append("images", categoryImage);
+    }
 
      const response = await axiosInstance.post("/api/add-category", formData, {
   headers: {

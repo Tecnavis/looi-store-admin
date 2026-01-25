@@ -25,13 +25,14 @@ const AllCategoryTable = () => {
                     },
                 });
 
-                if (Array.isArray(response.data)) {
-                    setProducts(response.data);
+                const list = response?.data?.categories || response?.data || [];
+                if (Array.isArray(list)) {
+                    setProducts(list);
                 } else {
-                    setError('No products found');
+                    setError('No categories found');
                 }
             } catch (err) {
-                setError('Error fetching products: ' + (err.response ? err.response.data.message : err.message));
+                setError('Error fetching categories: ' + (err.response ? err.response.data.message : err.message));
                 console.error(err);
             } finally {
                 setLoading(false);
