@@ -184,7 +184,7 @@ const AllProductTable = () => {
                   <td>
                     {data.coverImage ? (
                       <img
-                        src={`${BASE_URL}/uploads/${data.coverImage}`}
+                        src={data.coverImage}
                         alt="Cover Image"
                         style={{ width: '50px', height: '80px' }} // Adjust size as needed
                       />

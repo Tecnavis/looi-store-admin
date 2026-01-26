@@ -292,7 +292,7 @@ const AllAdBannerTable = () => {
                                         <div className="part-img">
                                             {data.image ? (
                                                 <img
-                                                    src={`${BASE_URL}/uploads/${data.image}`}
+                                                    src={data.image}
                                                     alt="Banner Image"
                                                     style={{ width: '100px', height: 'auto', objectFit: 'contain' }}
                                                 />

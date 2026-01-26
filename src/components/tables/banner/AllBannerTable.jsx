@@ -136,7 +136,7 @@ const AllProductTable = () => {
                                                 data.images.map((item, imgIndex) => (
                                                     <img
                                                         key={imgIndex}
-                                                        src={`${BASE_URL}/uploads/${item}`}
+                                                        src={item}
                                                         alt={`Banner Image ${imgIndex}`}
                                                         style={{ width: '100px', height: 'auto', objectFit: 'contain' }}
                                                     />
