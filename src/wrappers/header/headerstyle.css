@@ -1,0 +1,27 @@
+.header-area {
+    position: relative;
+    z-index: 999;
+  }
+  
+  .logo-container {
+    max-height: 80px;
+    overflow: hidden;
+  }
+  
+  .header-logo {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .sticky-bar.stick {
+    animation: 300ms ease-in-out 0s normal none 1 fadeInDown;
+    background-color: #fff;
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.05);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+    left: 0;
+    transition: all 0.3s ease 0s;
+  }

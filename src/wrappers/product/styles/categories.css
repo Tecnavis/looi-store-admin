@@ -1,0 +1,17 @@
+.card-no-border {
+    border: none;
+  }
+  
+  .zoom-container {
+    overflow: hidden; /* Hide any part of the image that gets zoomed beyond the container */
+  }
+  
+  .zoom-image {
+    transition: transform 0.3s ease-in-out; /* Smooth transition for the zoom effect */
+    width: 100%;
+  }
+  
+  .zoom-image:hover {
+    transform: scale(1.1); /* Zoom the image by 20% on hover */
+  }
+  

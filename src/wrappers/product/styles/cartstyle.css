@@ -1,0 +1,216 @@
+/* Custom accordion header styling */
+.accordion-button {
+    background-color: white; /* Set the background color */
+    color: black; /* Set the text color */
+    border: none; /* Remove border */
+    box-shadow: none; /* Remove default box-shadow */
+  }
+  
+  .accordion-button:focus {
+    box-shadow: none; /* Avoid the blue outline on focus */
+  }
+  
+  .accordion-button:not(.collapsed) {
+    background-color: white; /* Keep the background white when active */
+    color: black;
+  }
+  
+  .accordion-button:hover {
+    background-color: #e9ecef; /* Light grey on hover */
+  }
+  
+  .remove-btn {
+    background-color: #f8f9fa;
+   
+    color: #6c757d;
+    border: 1px solid lightgrey;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+ 
+
+  .wishlist-btn {
+    background-color: #f8f9fa; /* Current background color */
+    color: #6c757d; /* Text color */
+    border: 1px solid lightgrey; /* Border color */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* .wishlist-btn:hover {
+    background-color: rgba(0, 94, 0, 0.766); 
+    color: white; 
+    border-color: green; 
+  }
+  
+ */
+
+
+
+  .pro-details-size-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .size-button {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    color: #007FFF;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 25px; /* This makes the buttons rounded */
+    min-width: 50px; /* Ensures a minimum width for consistency */
+    text-align: center; /* Centers the text in the button */
+  }
+
+  .size-button:hover {
+    background-color: #f5f5f5;
+  }
+
+  .size-button.selected {
+    background-color: #007FFF;
+    color: #fff;
+    border-color: #007FFF;
+  }
+
+
+
+  .cart-item-card {
+    border: 1px solid #e0e0e0;
+    padding: 2px;
+    border-radius: 1px;
+  }
+  
+  .product-image {
+    width: 100%;
+    border-radius: 10px;
+  }
+  
+  .product-details {
+    padding-left: 20px;
+  }
+  
+  .size-input, .quantity-select {
+    width: 80px;
+  }
+  
+  .price-and-actions {
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-between; */
+    text-align: right;
+  }
+  
+  .price-and-actions h4 {
+    margin-bottom: 0;
+  }
+
+
+
+
+  .product-image {
+    width: 100%; /* Ensures the image takes full width of its container */
+    border-radius: 10px;
+    max-width: 150px; /* Sets a max width for larger screens */
+}
+
+@media (max-width: 576px) {
+  .product-image {
+    max-width: 100%; /* On small screens, make sure the image is fully responsive */
+  }
+  
+  .product-details h4 {
+    margin-top: 10%;
+    font-size: 16px; /* Adjust font size for smaller screens */
+  }
+
+  .size-input {
+    width: 50%;
+   /* Make the form inputs take full width on small screens */
+  }
+  .quantity-select{
+    margin-top: 5%;
+  }
+  
+  .price-and-actions {
+    margin-top: 5%;
+    text-align: left; /* Left-align price and actions for small screens */
+  }
+
+  .actions-buttons button {
+    width: 100%; /* Make buttons full-width on smaller devices */
+  }
+
+  .cart-item-card {
+    padding: 5px;
+  }
+}
+
+@media (min-width: 768px) {
+  .product-details h4 {
+    margin-top: 10%;
+    font-size: 20px; /* Increase font size for larger screens */
+  }
+}
+
+.accordion-button {
+    background-color: white;
+    color: black;
+    border: none;
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: white;
+    color: black;
+}
+
+.accordion-button:hover {
+    background-color: #e9ecef;
+}
+
+.remove-btn {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid lightgrey;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.wishlist-btn {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid lightgrey;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+.actions-buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .actions-buttons {
+    flex-direction: row;
+  }
+}
+
+.remove-btn, .wishlist-btn {
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .remove-btn, .wishlist-btn {
+    width: 50%; /* Half the width on medium and larger screens */
+  }
+}
+
+  
+ 

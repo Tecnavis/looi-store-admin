@@ -1,0 +1,40 @@
+.single-slider-3 {
+    width: 100%;
+    height: 500px; 
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  @media (max-width: 768px) {
+    .single-slider-3 {
+      height: 300px; 
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .single-slider-3 {
+      height: 250px; 
+    }
+  }
+  
+  .slider-height-5 {
+    height: 100%; 
+  
+  .bg-img {
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+  @media (max-width: 768px) {
+    .bg-img {
+      background-size: cover;
+      background-position: center;
+    }
+  }
+  
