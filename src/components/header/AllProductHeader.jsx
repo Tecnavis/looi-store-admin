@@ -123,7 +123,7 @@ const AllProductHeader = () => {
             </ul> */}
             </div>
             <div className="btn-box">
-                <Link to="/addproduct" className="btn btn-sm btn-primary"><i className="fa-light fa-plus"></i> Add New</Link>
+                <Link to="/addNewProduct" className="btn btn-sm btn-primary"><i className="fa-light fa-plus"></i> Add New</Link>
             </div>
         </div>
     </div>

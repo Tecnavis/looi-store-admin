@@ -19,7 +19,6 @@ const AllCustomer = lazy(() => import('./pages/AllCustomer'));
 const AddNewProduct = lazy(() => import('./pages/AddNewProduct'));
 
 const AllProduct = lazy(() => import('./pages/products/allproduct'));
-const AddProduct = lazy(() => import('./pages/products/addproduct'));
 const AddCategory = lazy(() => import('./pages/category/AddCategory'));
 const AddMainCategory = lazy(() => import('./pages/category/AddMainCategory'));
 const AddSubCategory = lazy(() => import('./pages/category/AddSubCategory'));
@@ -74,19 +73,18 @@ function App() {
               <Route path="/allCustomer" element={<ProtectedRoute><AllCustomer /></ProtectedRoute>} />
               <Route path="/addNewProduct" element={<ProtectedRoute><AddNewProduct /></ProtectedRoute>} />
               <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
-          
+
               <Route path="/addCategory" element={<ProtectedRoute><AddCategory /></ProtectedRoute>} />
               <Route path="/addMainCategory" element={<ProtectedRoute><AddMainCategory /></ProtectedRoute>} />
               <Route path="/addSubCategory" element={<ProtectedRoute><AddSubCategory /></ProtectedRoute>} />
               <Route path="/viewallcategory" element={<ProtectedRoute><ViewCategory /></ProtectedRoute>} />
-              <Route path="/addproduct" element={<ProtectedRoute><AddProduct/></ProtectedRoute>}/>
-              <Route path="/allproducts" element={<ProtectedRoute> <AllProduct/></ProtectedRoute>}/>
-              <Route path="/addbanner" element={<ProtectedRoute><AddBanner/></ProtectedRoute> }/>
-              <Route path="/adsbanner" element={<ProtectedRoute><AdsBanner/></ProtectedRoute> }/>
-              <Route path="/addprint" element={<ProtectedRoute><AddPrint/></ProtectedRoute> }/>
+              <Route path="/allproducts" element={<ProtectedRoute> <AllProduct /></ProtectedRoute>} />
+              <Route path="/addbanner" element={<ProtectedRoute><AddBanner /></ProtectedRoute>} />
+              <Route path="/adsbanner" element={<ProtectedRoute><AdsBanner /></ProtectedRoute>} />
+              <Route path="/addprint" element={<ProtectedRoute><AddPrint /></ProtectedRoute>} />
               <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
 
-              <Route path="*" element={<Error404/>} />
+              <Route path="*" element={<Error404 />} />
               {/* Add more protected routes as needed */}
             </Route>
           </Routes>

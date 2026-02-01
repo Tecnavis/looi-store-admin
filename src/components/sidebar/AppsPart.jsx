@@ -1,32 +1,32 @@
-import React, { useContext} from 'react';
+import React, { useContext } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { DigiContext } from '../../context/DigiContext';
 
 const AppsPart = () => {
-  const { 
-    state, 
-    toggleCrmDropdown, 
-    toggleHrmDropdown, 
+  const {
+    state,
+    toggleCrmDropdown,
+    toggleHrmDropdown,
     toggleEcommerceDropdown,
     toggleProductDropdown,
-    toggleMainDropdown, 
+    toggleMainDropdown,
     toggleSubDropdown,
-    layoutPosition, 
+    layoutPosition,
     dropdownOpen,
     mainAppsDropdownRef,
     isExpanded,
     isNavExpanded,
     isSmallScreen
   } = useContext(DigiContext);
-  const { 
-    isMainDropdownOpen, 
-    isCrmDropdownOpen, 
-    isHrmDropdownOpen, 
-    isEcommerceDropdownOpen, 
+  const {
+    isMainDropdownOpen,
+    isCrmDropdownOpen,
+    isHrmDropdownOpen,
+    isEcommerceDropdownOpen,
     isProductDropdownOpen,
-    isSubDropdownOpen 
+    isSubDropdownOpen
   } = state;
-  
+
   const handleSubNavLinkClick = () => {
     if (!isSubDropdownOpen) {
       toggleSubDropdown(); // Open the sub-dropdown
@@ -44,9 +44,9 @@ const AppsPart = () => {
       </Link>
       <ul className={`sidebar-link-group 
       ${layoutPosition.horizontal ? (dropdownOpen.apps ? 'd-block' : 'd-none') : (isMainDropdownOpen ? 'd-none' : '')}
-      `}>  
+      `}>
 
-{/* CRM */}
+        {/* CRM */}
         {/* <li className="sidebar-dropdown-item" >
           <Link
             role="button"
@@ -93,7 +93,7 @@ const AppsPart = () => {
             </li>
           </ul>
         </li> */}
-{/* HRM */}
+        {/* HRM */}
         {/* <li className="sidebar-dropdown-item">
           <Link
             role="button"
@@ -137,14 +137,13 @@ const AppsPart = () => {
             onClick={toggleEcommerceDropdown}
           >
             <span className="nav-icon">
-            <i class="fa-solid fa-list"></i>
+              <i class="fa-solid fa-list"></i>
             </span>{' '}
             <span className="sidebar-txt">Category</span>
           </Link>
           <ul
-            className={`sidebar-dropdown-menu ${
-              isEcommerceDropdownOpen && isSubDropdownOpen ? 'd-block' :''
-            }`}
+            className={`sidebar-dropdown-menu ${isEcommerceDropdownOpen && isSubDropdownOpen ? 'd-block' : ''
+              }`}
             id="ecommerceDropdown"
 
           >
@@ -164,7 +163,7 @@ const AppsPart = () => {
               </NavLink>
             </li>
              */}
-              <li className="sidebar-dropdown-item">
+            <li className="sidebar-dropdown-item">
               <NavLink to="/addCategory" className="sidebar-link" onClick={handleSubNavLinkClick}>
                 Add Category
               </NavLink>
@@ -184,8 +183,8 @@ const AppsPart = () => {
                 View Category
               </NavLink>
             </li>
-            
-            
+
+
           </ul>
         </li>
 
@@ -202,15 +201,14 @@ const AppsPart = () => {
             <span className="sidebar-txt">Product</span>
           </Link>
           <ul
-            className={`sidebar-dropdown-menu ${
-              isProductDropdownOpen && isSubDropdownOpen ? 'd-block' :''
-            }`}
+            className={`sidebar-dropdown-menu ${isProductDropdownOpen && isSubDropdownOpen ? 'd-block' : ''
+              }`}
             id="productDropdown"
 
           >
-           
-              <li className="sidebar-dropdown-item">
-              <NavLink to="/addproduct" className="sidebar-link" onClick={handleSubNavLinkClick}>
+
+            <li className="sidebar-dropdown-item">
+              <NavLink to="/addNewProduct" className="sidebar-link" onClick={handleSubNavLinkClick}>
                 Add Product
               </NavLink>
             </li>
@@ -224,7 +222,7 @@ const AppsPart = () => {
                 Add Sub Category
               </NavLink>
             </li> */}
-            
+
           </ul>
         </li>
 
@@ -246,7 +244,7 @@ const AppsPart = () => {
           </NavLink>
         </li> */}
 
-     <li className="sidebar-dropdown-item">
+        <li className="sidebar-dropdown-item">
           <NavLink to="/addbanner" className="sidebar-link">
             <span className="nav-icon">
               <i className="fa-light fa-calendar"></i>
@@ -258,7 +256,7 @@ const AppsPart = () => {
         <li className="sidebar-dropdown-item">
           <NavLink to="/adsbanner" className="sidebar-link">
             <span className="nav-icon">
-            <i class="fa-regular fa-note-sticky"></i>
+              <i class="fa-regular fa-note-sticky"></i>
             </span>{' '}
             <span className="sidebar-txt">Ads Banner</span>
           </NavLink>
@@ -267,8 +265,8 @@ const AppsPart = () => {
         <li className="sidebar-dropdown-item">
           <NavLink to="/addprint" className="sidebar-link">
             <span className="nav-icon">
-        <i class="fa-solid fa-note-sticky"></i>
-                        </span>{' '}
+              <i class="fa-solid fa-note-sticky"></i>
+            </span>{' '}
             <span className="sidebar-txt">Add Prints</span>
           </NavLink>
         </li>
@@ -276,8 +274,8 @@ const AppsPart = () => {
         <li className="sidebar-dropdown-item">
           <NavLink to="/allCustomer" className="sidebar-link">
             <span className="nav-icon">
-            <i class="fa-solid fa-people-group"></i>
-                        </span>{' '}
+              <i class="fa-solid fa-people-group"></i>
+            </span>{' '}
             <span className="sidebar-txt">All Customer</span>
           </NavLink>
         </li>
@@ -291,7 +289,7 @@ const AppsPart = () => {
           </NavLink>
         </li>
 
-        
+
 
 
         {/* <li className="sidebar-dropdown-item">
