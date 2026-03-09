@@ -1,98 +1,136 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../../axiosConfig';
+import React, { useState } from "react";
+import Footer from "../footer/Footer";
+import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from "../../axiosConfig";
 
 const LoginContent = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // ✅ moved here
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !password) {
-      setError('Please enter username and password.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
     try {
-      // CORRECTED: Use '/admin-login' instead of '/admin/login'
-      const response = await axiosInstance.post('https://looi-store-server-izvs.onrender.com//api/admin-login', {
+      const response = await axiosInstance.post("/admin-login", {
         username,
         password
       });
-      
-      console.log('Login response:', response.data);
-      
-      // Save the real token from API response
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        navigate('/', { replace: true });
-      } else {
-        setError('No token received from server');
-      }
+
+      console.log("Login success:", response.data);
+
+      // save token
+      localStorage.setItem("token", response.data.token);
+
+      // redirect
+      navigate("/dashboard");
+
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+      console.error(err.response?.data || err.message);
+      setError("Login failed. Please try again.");
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: '100%', maxWidth: 400, padding: 24, borderRadius: 12, background: '#111', color: '#fff', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Store Admin Login</h2>
-        {error && (
-          <div style={{ marginBottom: 16, padding: 8, borderRadius: 6, background: '#331111', color: '#ff8080', fontSize: 13 }}>
-            {error}
+    <div className="main-content login-panel login-panel-2">
+      <h3 className="panel-title">Login</h3>
+
+      <div className="login-body login-body-2">
+        <div className="top d-flex justify-content-between align-items-center">
+          <div className="logo">
+            <img src="assets/images/looi-bl.png" alt="Logo"/>
           </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #444', background: '#000', color: '#fff' }}
-            />
+
+          <Link to="/">
+            <i className="fa-duotone fa-house-chimney"></i>
+          </Link>
+        </div>
+
+        <div className="bottom">
+
+          {error && (
+            <div className="alert alert-danger mb-3">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+
+            {/* Username */}
+            <div className="input-group mb-30">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Username"
+                value={username}
+                onChange={(e)=>setUsername(e.target.value)}
+                required
+              />
+              <span className="input-group-text">
+                <i className="fa-regular fa-user"></i>
+              </span>
+            </div>
+
+            {/* Password */}
+            <div className="input-group mb-20">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control"
+                placeholder="Password"
+                value={password}
+                onChange={(e)=>setPassword(e.target.value)}
+                required
+              />
+
+              <span
+                className="input-group-text"
+                style={{ cursor: "pointer" }}
+                onClick={()=>setShowPassword(!showPassword)}
+              >
+                <i className={`fa-regular ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+              </span>
+            </div>
+
+            <div className="d-flex justify-content-between mb-30">
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="loginCheckbox"
+                />
+                <label className="form-check-label text-white">
+                  Remember Me
+                </label>
+              </div>
+
+              <Link to="/resetPassword" className="text-white fs-14">
+                Forgot Password?
+              </Link>
+            </div>
+
+            <button className="btn btn-primary w-100 login-btn" type="submit">
+              Login
+            </button>
+
+          </form>
+
+          <div className="other-option">
+            <p className="mb-0">
+              Don't have an account?
+              <Link to="/registration2" className="text-white text-decoration-underline">
+                create
+              </Link>
+            </p>
           </div>
-          <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #444', background: '#000', color: '#fff' }}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: 10,
-              borderRadius: 6,
-              border: 'none',
-              background: loading ? '#666' : '#22c55e',
-              color: '#000',
-              fontWeight: 600,
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {loading ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
-        <div style={{ marginTop: 16, fontSize: 12, color: '#888', textAlign: 'center' }}>
-          Note: This login connects to your backend API
+
         </div>
       </div>
+
+      <Footer/>
     </div>
   );
 };
