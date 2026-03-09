@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import Footer from "../footer/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-
+import React, { useState } from "react";
+const [showPassword, setShowPassword] = useState(false);
 const LoginContent2 = () => {
 
   const navigate = useNavigate();
@@ -73,18 +74,23 @@ const LoginContent2 = () => {
             </div>
 
             <div className="input-group mb-20">
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Password"
-                value={password}
-                onChange={(e)=>setPassword(e.target.value)}
-                required
-              />
-              <span className="input-group-text">
-                <i className="fa-regular fa-lock"></i>
-              </span>
-            </div>
+  <input
+    type={showPassword ? "text" : "password"}
+    className="form-control"
+    placeholder="Password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+  />
+
+  <span
+    className="input-group-text"
+    style={{ cursor: "pointer" }}
+    onClick={() => setShowPassword(!showPassword)}
+  >
+    <i className={`fa-regular ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+  </span>
+</div>
 
             <div className="d-flex justify-content-between mb-30">
               <div className="form-check">
