@@ -3,7 +3,7 @@ import axios from "axios";
 const BASE_URL =
   import.meta.env?.VITE_BASE_URL ||
   process.env?.REACT_APP_BASE_URL ||
-  "https://looi-store-server-ypdx.onrender.com";
+  "https://api.looi.in";   // ✅ correct backend domain
 
 const instance = axios.create({
   baseURL: `${BASE_URL}/api`,
@@ -12,7 +12,7 @@ const instance = axios.create({
   },
 });
 
-// ✅ Attach token automatically for every request
+// attach token automatically
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -21,7 +21,6 @@ instance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // ✅ If request is FormData, DO NOT set JSON content-type
     if (config.data instanceof FormData) {
       delete config.headers["Content-Type"];
     } else {
@@ -33,7 +32,7 @@ instance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Handle 401
+// handle unauthorized
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
