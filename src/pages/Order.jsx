@@ -1,48 +1,61 @@
-import React, { useEffect, useState } from 'react'
-import Footer from '../components/footer/Footer'
-import OrderHeader from '../components/header/OrderHeader'
-import HeaderBtn from '../components/header/HeaderBtn'
-import OrderTableFilter from '../components/filter/OrderTableFilter'
-import OrderListTable from '../components/tables/OrderListTable'
-import { Spinner } from 'react-bootstrap'; 
+import React, {useEffect,useState} from "react";
+import axios from "axios";
 
+const OrderListTable = () => {
 
-const OrderMainContent = () => {
-    const [isLoading, setIsLoading] = useState(true);
+const [orders,setOrders] = useState([]);
 
-    useEffect(() => {
-        // Simulate an API call or other setup tasks
-        setTimeout(() => {
-            setIsLoading(false);  // Set loading to false once setup is done
-        }, 1000);  // Example delay, replace with actual data fetch or setup logic if needed
-    }, []);
+useEffect(()=>{
 
-    if (isLoading) {
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner>
-            </div>
-        );
-    }
-  return (
-    <div className="main-content">
-        <div className="row g-4">
-            <div className="col-12">
-                <div className="panel">
-                   <OrderHeader/>
-                    <div className="panel-body">
-                        {/* <HeaderBtn/> */}
-                        {/* <OrderTableFilter/> */}
-                        <OrderListTable/>
-                    </div>
-                </div>
-            </div>
-        </div>
-       
-    </div>
-  )
-}
+axios.get("http://localhost:5000/api/orders")
+.then(res=>{
+setOrders(res.data);
+});
 
-export default OrderMainContent
+},[]);
+
+return(
+
+<table className="table">
+
+<thead>
+
+<tr>
+<th>Order ID</th>
+<th>Customer</th>
+<th>Total</th>
+<th>Payment</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{orders.map(order=>(
+
+<tr key={order._id}>
+
+<td>{order._id}</td>
+
+<td>{order.customer?.name}</td>
+
+<td>₹{order.totalAmount}</td>
+
+<td>{order.paymentMethod}</td>
+
+<td>{order.orderStatus}</td>
+
+</tr>
+
+))}
+
+</tbody>
+
+</table>
+
+);
+
+};
+
+export default OrderListTable;

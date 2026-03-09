@@ -22,7 +22,7 @@
     "@tanstack/react-table": "^8.9.2",
     "@tanstack/table-core": "^8.9.2",
     "aos": "^2.3.4",
-    "axios": "^1.7.7",
+    "axios": "^1.13.6",
     "dropzone": "^6.0.0-beta.2",
     "font-awesome": "^4.7.0",
     "overlayscrollbars": "^2.2.1",

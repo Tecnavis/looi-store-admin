@@ -1,32 +1,54 @@
-import React from 'react'
-import Footer from "../components/footer/Footer"
-import DashboardBreadcrumb from '../components/breadcrumb/DashboardBreadcrumb'
-import DashboardCards from '../components/cards/DashboardCards'
-import SalesAnalytics from '../components/dashboard/SalesAnalytics'
-import SocialVisitors from '../components/dashboard/SocialVisitors'
-import NewCustomer from '../components/dashboard/NewCustomer'
-import RecentOrder from '../components/dashboard/RecentOrder'
-import AreaChartComponent from '../components/charts/AreaChartComponent'
-const DashboardMainContent = () => {
-  return (
-    <div className="main-content">
-        <DashboardBreadcrumb title={'eCommerce Dashboard'}/>
-        <DashboardCards/>
-        <div className="row">
-            {/* <SalesAnalytics/> */}
-            {/* <SocialVisitors/> */}
-            {/* <NewCustomer/> */}
-            <div className="panel-body mt-5 mb-5">
-                    <div id="areaChart">
-                        <AreaChartComponent/>
-                    </div>
-                </div>
-            <RecentOrder/>
+import React, {useEffect,useState} from "react";
+import axios from "axios";
 
-        </div>
-        {/* <Footer/> */}
-    </div>
-  )
-}
+const DashboardCards = () => {
 
-export default DashboardMainContent
+const [stats,setStats] = useState({
+orders:0,
+revenue:0
+});
+
+useEffect(()=>{
+
+axios.get("http://localhost:5000/api/dashboard")
+.then(res=>{
+setStats(res.data);
+});
+
+},[]);
+
+return(
+
+<div className="row">
+
+<div className="col-md-6">
+
+<div className="card">
+
+<h4>Total Orders</h4>
+
+<p>{stats.orders}</p>
+
+</div>
+
+</div>
+
+<div className="col-md-6">
+
+<div className="card">
+
+<h4>Total Revenue</h4>
+
+<p>₹{stats.revenue}</p>
+
+</div>
+
+</div>
+
+</div>
+
+);
+
+};
+
+export default DashboardCards;
