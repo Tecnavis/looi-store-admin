@@ -3,7 +3,6 @@ import Footer from "../footer/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
 
-const [showPassword, setShowPassword] = useState(false);
 const LoginContent2 = () => {
 
   const navigate = useNavigate();
@@ -11,6 +10,7 @@ const LoginContent2 = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // ✅ moved here
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,10 +23,10 @@ const LoginContent2 = () => {
 
       console.log("Login success:", response.data);
 
-      // save JWT token
+      // save token
       localStorage.setItem("token", response.data.token);
 
-      // redirect to dashboard
+      // redirect
       navigate("/dashboard");
 
     } catch (err) {
@@ -44,6 +44,7 @@ const LoginContent2 = () => {
           <div className="logo">
             <img src="assets/images/looi-bl.png" alt="Logo"/>
           </div>
+
           <Link to="/">
             <i className="fa-duotone fa-house-chimney"></i>
           </Link>
@@ -59,6 +60,7 @@ const LoginContent2 = () => {
 
           <form onSubmit={handleSubmit}>
 
+            {/* Username */}
             <div className="input-group mb-30">
               <input
                 type="text"
@@ -73,24 +75,25 @@ const LoginContent2 = () => {
               </span>
             </div>
 
+            {/* Password */}
             <div className="input-group mb-20">
-  <input
-    type={showPassword ? "text" : "password"}
-    className="form-control"
-    placeholder="Password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    required
-  />
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control"
+                placeholder="Password"
+                value={password}
+                onChange={(e)=>setPassword(e.target.value)}
+                required
+              />
 
-  <span
-    className="input-group-text"
-    style={{ cursor: "pointer" }}
-    onClick={() => setShowPassword(!showPassword)}
-  >
-    <i className={`fa-regular ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
-  </span>
-</div>
+              <span
+                className="input-group-text"
+                style={{ cursor: "pointer" }}
+                onClick={()=>setShowPassword(!showPassword)}
+              >
+                <i className={`fa-regular ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+              </span>
+            </div>
 
             <div className="d-flex justify-content-between mb-30">
               <div className="form-check">
