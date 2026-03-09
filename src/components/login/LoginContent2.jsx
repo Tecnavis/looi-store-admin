@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Footer from "../footer/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-import React, { useState } from "react";
+
 const [showPassword, setShowPassword] = useState(false);
 const LoginContent2 = () => {
 
