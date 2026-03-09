@@ -1,54 +1,64 @@
-import React, {useEffect,useState} from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const DashboardCards = () => {
+const DashboardMainContent = () => {
 
-const [stats,setStats] = useState({
-orders:0,
-revenue:0
-});
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    totalUsers: 0,
+    totalProducts: 0,
+    totalRevenue: 0
+  });
 
-useEffect(()=>{
+  useEffect(() => {
 
-axios.get("http://localhost:5000/api/dashboard")
-.then(res=>{
-setStats(res.data);
-});
+    axios
+      .get("https://looi-store-server-izvs.onrender.com//api/dashboard/analytics")
+      .then((res) => {
+        setStats(res.data);
+      });
 
-},[]);
+  }, []);
 
-return(
+  return (
 
-<div className="row">
+    <div className="main-content">
 
-<div className="col-md-6">
+      <div className="row">
 
-<div className="card">
+        <div className="col-md-3">
+          <div className="card p-3">
+            <h6>Total Revenue</h6>
+            <h3>₹{stats.totalRevenue}</h3>
+          </div>
+        </div>
 
-<h4>Total Orders</h4>
+        <div className="col-md-3">
+          <div className="card p-3">
+            <h6>Total Orders</h6>
+            <h3>{stats.totalOrders}</h3>
+          </div>
+        </div>
 
-<p>{stats.orders}</p>
+        <div className="col-md-3">
+          <div className="card p-3">
+            <h6>Customers</h6>
+            <h3>{stats.totalUsers}</h3>
+          </div>
+        </div>
 
-</div>
+        <div className="col-md-3">
+          <div className="card p-3">
+            <h6>Products</h6>
+            <h3>{stats.totalProducts}</h3>
+          </div>
+        </div>
 
-</div>
+      </div>
 
-<div className="col-md-6">
+    </div>
 
-<div className="card">
-
-<h4>Total Revenue</h4>
-
-<p>₹{stats.revenue}</p>
-
-</div>
-
-</div>
-
-</div>
-
-);
-
+  );
 };
 
-export default DashboardCards;
+export default DashboardMainContent;

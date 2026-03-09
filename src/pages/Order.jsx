@@ -7,7 +7,7 @@ const [orders,setOrders] = useState([]);
 
 useEffect(()=>{
 
-axios.get("http://localhost:5000/api/orders")
+axios.get("https://looi-store-server-izvs.onrender.com//api/orders")
 .then(res=>{
 setOrders(res.data);
 });
