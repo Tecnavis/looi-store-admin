@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./protected-route/protected-route";
