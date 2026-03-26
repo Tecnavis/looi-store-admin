@@ -1,4 +1,5 @@
-import { HashRouter as Router } from "react-router-dom";
+
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./protected-route/protected-route";
@@ -48,7 +49,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registration" element={<Registration />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
-          <Route path="/error404" element={<Error404 />} />
+          <Route path="*" element={<Error404 />} />
 
           {/* Protected Routes */}
           <Route element={<Layout />}>
