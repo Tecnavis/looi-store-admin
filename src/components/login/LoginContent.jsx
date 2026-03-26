@@ -177,7 +177,7 @@ const LoginContent = () => {
     }
 
     try {
-      const response = await axiosInstance.post('/admin-login', {
+      const response = await axios.post('https://looi-store-server-izvs.onrender.com/api/admin-login', data), {
         username,
         password,
       });
