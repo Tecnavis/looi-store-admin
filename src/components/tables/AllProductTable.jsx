@@ -6,7 +6,7 @@ import axiosInstance from '../../../axiosConfig';
 import EditProduct from '../../pages/products/editproduct';
 import Swal from 'sweetalert2'; // Import SweetAlert
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://looi-store-server-izvs.onrender.com/api'
+const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://looi-store-server-izvs.onrender.com'
 
 const AllProductTable = () => {
   const [products, setProducts] = useState([]); // State to hold product data

@@ -9,7 +9,7 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://looi-store-server-izvs.onrender.com/api'
+const BASE_URL = import.meta.env.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || 'https://looi-store-server-izvs.onrender.com'
 
 
 const AllProductTable = () => {
