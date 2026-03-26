@@ -10,9 +10,22 @@
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" id="primaryColor" href="assets/css/blue-color.css">
+
+      <script>
+  // SPA fallback fix for Render
+  (function () {
+    const path = window.location.pathname;
+    if (path !== "/" && !path.includes(".")) {
+      window.location.replace("/#" + path);
+    }
+  })();
+</script>
+
+
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
+
 </html>
