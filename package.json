@@ -20,6 +20,7 @@
     "@fullcalendar/timegrid": "^6.1.8",
     "@tanstack/react-table": "^8.9.2",
     "@tanstack/table-core": "^8.9.2",
+    "@vitejs/plugin-react": "^4.0.3",
     "aos": "^2.3.4",
     "axios": "^1.7.7",
     "dropzone": "^6.0.0-beta.2",
