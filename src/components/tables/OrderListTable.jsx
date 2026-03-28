@@ -43,6 +43,7 @@ const OrderListTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [dataPerPage] = useState(15);
   const [orderList, setOrderList] = useState([]);
+  const [isFetching, setIsFetching] = useState(true);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -87,9 +88,11 @@ const OrderListTable = () => {
             "Content-Type": "application/json",
           },
         });
-        setOrderList(response.data.orders);
+        setOrderList(response.data.orders || []);
       } catch (err) {
         console.log("Error fetching order list", err);
+      } finally {
+        setIsFetching(false);
       }
     };
     fetchOrderList();
@@ -153,6 +156,12 @@ const OrderListTable = () => {
       }
     }
   };
+  if (isFetching)
+    return (
+      <div className="text-center mt-5">
+        <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>
+      </div>
+    );
   if (orderList.length === 0)
     return (
       <div className="text-center mt-5">
