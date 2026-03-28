@@ -18,7 +18,7 @@ const AddSubCategory = () => {
     const [errors, setErrors] = useState({});
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [previewImages, setPreviewImages] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
 
     useEffect(() => {
@@ -44,10 +44,6 @@ const AddSubCategory = () => {
                 console.error('Error fetching categories:', err);
             }
         };
-        setTimeout(() => {
-            setLoading(false);  // Set loading to false once setup is done
-          }, 1000);
-
         fetchCategories();
     }, []);
 
@@ -162,6 +158,15 @@ const AddSubCategory = () => {
         );
         setPreviewImages(previews);
     }, []);
+
+    // Revoke object URLs when preview images change to avoid memory leaks
+    useEffect(() => {
+        return () => {
+            previewImages.forEach(file => {
+                if (file.preview) URL.revokeObjectURL(file.preview);
+            });
+        };
+    }, [previewImages]);
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,

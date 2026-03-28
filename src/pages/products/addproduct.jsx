@@ -713,7 +713,7 @@ const AddProduct = () => {
 
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [currentSize, setCurrentSize] = useState('');
   const [currentColor, setCurrentColor] = useState('');
@@ -750,10 +750,6 @@ const AddProduct = () => {
         setError((prev) => ({ ...prev, fetch: 'Error fetching categories' }));
       }
     };
-    setTimeout(() => {
-      setLoading(false);  // Set loading to false once setup is done
-    }, 1000);
-
     fetchCategories();
 
   }, []);
@@ -1250,6 +1246,16 @@ const AddProduct = () => {
                 onChange={handleCoverImageChange}
                 ref={imageInputRef}
               />
+              {coverImage && (
+                <div className="mt-2">
+                  <img
+                    src={URL.createObjectURL(coverImage)}
+                    alt="Cover preview"
+                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #dee2e6' }}
+                  />
+                  <div className="text-muted small mt-1">{coverImage.name}</div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -1391,6 +1397,16 @@ const AddProduct = () => {
                         <strong>Color:</strong> {color.color},
                         <strong> Stock:</strong> {color.stock},
                         <strong> Images:</strong> {color.images.length}
+                        <div className="d-flex flex-wrap mt-2">
+                          {color.images.map((img, imgIdx) => (
+                            <img
+                              key={imgIdx}
+                              src={URL.createObjectURL(img)}
+                              alt={`preview-${imgIdx}`}
+                              style={{ width: '60px', height: '60px', objectFit: 'cover', margin: '0 4px 4px 0', borderRadius: '4px', border: '1px solid #dee2e6' }}
+                            />
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>

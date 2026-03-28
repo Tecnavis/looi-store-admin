@@ -184,7 +184,7 @@ const AllProductTable = () => {
                   <td>
                     {data.coverImage ? (
                       <img
-                        src={`${BASE_URL}/uploads/${data.coverImage}`}
+                        src={data.coverImage}
                         alt="Cover Image"
                         style={{ width: '50px', height: '80px' }} // Adjust size as needed
                       />
@@ -257,8 +257,8 @@ const AllProductTable = () => {
                     <div className="btn-box">
                       <button><i className="fa-light fa-eye"></i>
                       </button>
-                      <button>
-                        <i className="fa-light fa-pen" onClick={() => handleEditButtonClick(data)}></i>
+                      <button onClick={() => handleEditButtonClick(data)}>
+                        <i className="fa-light fa-pen"></i>
                       </button>
                       <button onClick={() => handleDelete(data._id)}>
                         <i className="fa-light fa-trash"></i>

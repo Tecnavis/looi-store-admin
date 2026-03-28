@@ -18,7 +18,7 @@ const AddMainCategory = () => {
     const [mainCategoryError, setMainCategoryError] = useState('');
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [previewImages, setPreviewImages] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
   const clearForm = () => {
     setCategoryTitle('');
@@ -55,11 +55,7 @@ const AddMainCategory = () => {
             console.error('Error fetching main categories:', err);
         }
     };
-    setTimeout(() => {
-        setLoading(false);  // Set loading to false once setup is done
-      }, 1000);
-
-      fetchCategories();
+    fetchCategories();
   }, []);
   
   // Validation for categoryTitle while typing
@@ -147,6 +143,15 @@ const AddMainCategory = () => {
     );
     setPreviewImages(previews);
 }, []);
+
+// Revoke object URLs when preview images change to avoid memory leaks
+useEffect(() => {
+    return () => {
+        previewImages.forEach(file => {
+            if (file.preview) URL.revokeObjectURL(file.preview);
+        });
+    };
+}, [previewImages]);
 
 const { getRootProps, getInputProps } = useDropzone({
     onDrop,
