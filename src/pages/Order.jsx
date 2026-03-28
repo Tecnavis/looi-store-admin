@@ -5,7 +5,7 @@ import HeaderBtn from '../components/header/HeaderBtn'
 import OrderTableFilter from '../components/filter/OrderTableFilter'
 import OrderListTable from '../components/tables/OrderListTable'
 import { Spinner, Alert } from 'react-bootstrap';
-import axiosInstance from '../config/axiosconfig'; // adjust path if needed
+import axiosInstance from '../../axiosConfig'; // adjust path if needed
 
 const OrderMainContent = () => {
     const [isLoading, setIsLoading] = useState(true);
