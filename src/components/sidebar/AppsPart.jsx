@@ -46,6 +46,14 @@ const AppsPart = () => {
       ${layoutPosition.horizontal ? (dropdownOpen.apps ? 'd-block' : 'd-none') : (isMainDropdownOpen ? 'd-none' : '')}
       `}>  
 
+        {/* Dashboard Home */}
+        <li className="sidebar-dropdown-item">
+          <NavLink to="/" className="sidebar-link" end>
+            <span className="nav-icon"><i className="fa-light fa-gauge-high"></i></span>{' '}
+            <span className="sidebar-txt">Dashboard</span>
+          </NavLink>
+        </li>
+
 {/* CRM */}
         {/* <li className="sidebar-dropdown-item" >
           <Link
@@ -137,7 +145,7 @@ const AppsPart = () => {
             onClick={toggleEcommerceDropdown}
           >
             <span className="nav-icon">
-            <i class="fa-solid fa-list"></i>
+            <i className="fa-light fa-list"></i>
             </span>{' '}
             <span className="sidebar-txt">Category</span>
           </Link>
@@ -231,7 +239,7 @@ const AppsPart = () => {
         {/* <li className="sidebar-dropdown-item">
           <NavLink to="/addNewProduct" className="sidebar-link">
             <span className="nav-icon">
-            <i class="fa-solid fa-cart-plus"></i>
+            <i className="fa-light fa-cart-plus"></i>
             </span>{' '}
             <span className="sidebar-txt"> Add Product</span>
           </NavLink>
@@ -258,7 +266,7 @@ const AppsPart = () => {
         <li className="sidebar-dropdown-item">
           <NavLink to="/adsbanner" className="sidebar-link">
             <span className="nav-icon">
-            <i class="fa-regular fa-note-sticky"></i>
+            <i className="fa-light fa-note-sticky"></i>
             </span>{' '}
             <span className="sidebar-txt">Ads Banner</span>
           </NavLink>
@@ -267,7 +275,7 @@ const AppsPart = () => {
         <li className="sidebar-dropdown-item">
           <NavLink to="/addprint" className="sidebar-link">
             <span className="nav-icon">
-        <i class="fa-solid fa-note-sticky"></i>
+        <i className="fa-light fa-note-sticky"></i>
                         </span>{' '}
             <span className="sidebar-txt">Add Prints</span>
           </NavLink>
@@ -276,7 +284,7 @@ const AppsPart = () => {
         <li className="sidebar-dropdown-item">
           <NavLink to="/allCustomer" className="sidebar-link">
             <span className="nav-icon">
-            <i class="fa-solid fa-people-group"></i>
+            <i className="fa-light fa-people-group"></i>
                         </span>{' '}
             <span className="sidebar-txt">All Customer</span>
           </NavLink>
