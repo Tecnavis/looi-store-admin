@@ -21,6 +21,10 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
         maincategory: '',
         subcategory: '',
         totalStock: 0,
+        length: 0,
+        width: 0,
+        height: 0,
+        weight: 0,
         ratings: {
             average: 0,
             count: 0
@@ -55,6 +59,10 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
                     maincategory: productData.maincategory || '',
                     subcategory: productData.subcategory || '',
                     totalStock: productData.totalStock || 0,
+                    length: productData.length || 0,
+                    width: productData.width || 0,
+                    height: productData.height || 0,
+                    weight: productData.weight || 0,
                     ratings: {
                         average: productData.ratings?.average || 0,
                         count: productData.ratings?.count || 0
@@ -308,6 +316,68 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
                         </Col>
                     </Row>
 
+                    <Row className="mb-3">
+                        <Col md={12}>
+                            <h6 className="text-muted mb-2">Shipping Dimensions & Weight</h6>
+                        </Col>
+                        <Col md={3}>
+                            <Form.Group>
+                                <Form.Label>Length (cm)</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="length"
+                                    value={formData.length}
+                                    onChange={handleChange}
+                                    min="0"
+                                    step="0.1"
+                                    required
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col md={3}>
+                            <Form.Group>
+                                <Form.Label>Width (cm)</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="width"
+                                    value={formData.width}
+                                    onChange={handleChange}
+                                    min="0"
+                                    step="0.1"
+                                    required
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col md={3}>
+                            <Form.Group>
+                                <Form.Label>Height (cm)</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="height"
+                                    value={formData.height}
+                                    onChange={handleChange}
+                                    min="0"
+                                    step="0.1"
+                                    required
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col md={3}>
+                            <Form.Group>
+                                <Form.Label>Weight (kg)</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="weight"
+                                    value={formData.weight}
+                                    onChange={handleChange}
+                                    min="0"
+                                    step="0.01"
+                                    required
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+
                     <Form.Group className="mb-3">
                         <Form.Label>Cover Image</Form.Label>
                         {formData.coverImage && (
@@ -420,8 +490,3 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
 };
 
 export default EditProduct;
-
-
-
-
-
