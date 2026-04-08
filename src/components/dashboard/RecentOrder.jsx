@@ -50,7 +50,7 @@ const RecentOrder = () => {
                                     <th>Payment Method</th>
                                     <th>Total Amount</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    {/* <th>Action</th> */}
                                 </tr>
                             </thead>
                             <tbody>
@@ -70,13 +70,13 @@ const RecentOrder = () => {
                                                 {order.paymentStatus}
                                             </span>
                                         </td>
-                                        <td>
+                                        {/* <td>
                                             <div className="btn-box">
                                                 <button title="View"><i className="fa-light fa-eye"></i></button>
                                                 <button title="Edit"><i className="fa-light fa-pen"></i></button>
                                                 <button title="Delete"><i className="fa-light fa-trash"></i></button>
                                             </div>
-                                        </td>
+                                        </td> */}
                                     </tr>
                                 ))}
                             </tbody>
