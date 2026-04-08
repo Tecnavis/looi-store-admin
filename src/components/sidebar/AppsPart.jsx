@@ -299,6 +299,15 @@ const AppsPart = () => {
           </NavLink>
         </li>
 
+        <li className="sidebar-dropdown-item">
+          <NavLink to="/email-notifications" className="sidebar-link">
+            <span className="nav-icon">
+              <i className="fa-light fa-bell"></i>
+            </span>{' '}
+            <span className="sidebar-txt">Email Notifications</span>
+          </NavLink>
+        </li>
+
         
 
 

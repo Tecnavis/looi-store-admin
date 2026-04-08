@@ -1,4 +1,3 @@
-
 import { HashRouter as Router, Routes, Route } from "react-router-dom";import React, { Suspense, lazy } from "react";
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./protected-route/protected-route";
@@ -30,6 +29,7 @@ const AddBanner = lazy(() => import('./pages/banner/AddBanner'));
 const AdsBanner = lazy(() => import('./pages/banner/AdsBanner'));
 const AddPrint=lazy(()=>import('./pages/products/addprints'))
 const Order=lazy(()=>import('./pages/Order'))
+const EmailNotifications=lazy(()=>import('./pages/EmailNotifications'))
 
 
 // Public components (no lazy-loading needed if they're small)
@@ -77,6 +77,7 @@ function App() {
         <Route path="/adsbanner" element={<ProtectedRoute><AdsBanner/></ProtectedRoute> }/>
         <Route path="/addprint" element={<ProtectedRoute><AddPrint/></ProtectedRoute> }/>
         <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
+        <Route path="/email-notifications" element={<ProtectedRoute><EmailNotifications /></ProtectedRoute>} />
 
 
         <Route path="*" element={<Error404/>} />
@@ -91,4 +92,3 @@ function App() {
 }
 
 export default App;
-
