@@ -147,6 +147,111 @@ const OrderListTable = () => {
     }, 120);
   };
 
+  // ── Print Invoice (proper GST invoice for admin) ───────────────────────────
+  const handlePrintInvoice = (order) => {
+    const TAX_RATE = 5;
+    const totalAmount = Number(order.totalAmount) || 0;
+    const subtotalExclTax = totalAmount / (1 + TAX_RATE / 100);
+    const totalTaxAmount = totalAmount - subtotalExclTax;
+    const cgst = totalTaxAmount / 2;
+    const sgst = totalTaxAmount / 2;
+    const a = order.shippingAddress || {};
+    const customerName = [a.firstName, a.lastName].filter(Boolean).join(' ') || order.user?.name || 'N/A';
+    const addressLine = [a.houseBuilding, a.streetArea, a.landmark, a.cityDistrict, a.state, a.postalCode].filter(Boolean).join(', ');
+
+    const itemRowsHtml = (order.orderItems || []).map((item, i) => {
+      const qty = Number(item.quantity) || 1;
+      const lineTotal = Number(item.price) || 0;
+      const taxRate = Number(item.taxRate || TAX_RATE);
+      const unitExclTax = (lineTotal / qty) / (1 + taxRate / 100);
+      const lineTaxAmt = lineTotal - (unitExclTax * qty);
+      return `<tr style="background:${i % 2 === 0 ? '#f9f9f9' : '#fff'}">
+        <td style="padding:7px 10px;border:1px solid #ddd;">${i + 1}</td>
+        <td style="padding:7px 10px;border:1px solid #ddd;">${item.productName}${item.size ? ` <small style="color:#888">(${item.size}${item.color ? '/' + item.color : ''})</small>` : ''}</td>
+        <td style="padding:7px 10px;border:1px solid #ddd;text-align:center;">${item.hsn || '—'}</td>
+        <td style="padding:7px 10px;border:1px solid #ddd;text-align:center;">${qty}</td>
+        <td style="padding:7px 10px;border:1px solid #ddd;text-align:right;">₹${unitExclTax.toFixed(2)}</td>
+        <td style="padding:7px 10px;border:1px solid #ddd;text-align:center;">${taxRate}%</td>
+        <td style="padding:7px 10px;border:1px solid #ddd;text-align:right;">₹${lineTaxAmt.toFixed(2)}</td>
+        <td style="padding:7px 10px;border:1px solid #ddd;text-align:right;font-weight:600;">₹${lineTotal.toFixed(2)}</td>
+      </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+      <title>Invoice — ${order.orderId}</title>
+      <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:20px;}
+        .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+        .brand{font-size:24px;font-weight:900;letter-spacing:2px;}
+        .inv-title{font-size:20px;font-weight:700;text-align:right;}
+        .inv-meta{font-size:12px;color:#555;text-align:right;margin-top:4px;}
+        hr{border:none;border-top:2px solid #000;margin:12px 0;}
+        .section{display:flex;justify-content:space-between;margin-bottom:16px;}
+        .block{width:48%;}
+        .block-title{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+        table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+        thead tr{background:#1a1a2e;color:#fff;}
+        th{padding:8px 10px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;}
+        .totals{width:300px;margin-left:auto;border:1px solid #ddd;}
+        .totals td{padding:7px 12px;border-bottom:1px solid #eee;font-size:12px;}
+        .totals .grand td{font-weight:700;font-size:14px;background:#1a1a2e;color:#fff;}
+        .footer{margin-top:24px;padding-top:12px;border-top:1px solid #ccc;text-align:center;font-size:11px;color:#888;}
+        @media print{body{padding:10px;} .no-print{display:none;}}
+      </style></head>
+    <body>
+      <div class="header">
+        <div>
+          <div class="brand">LOOI</div>
+          <div style="font-size:11px;color:#666;margin-top:4px;">www.looi.in | support@looi.in</div>
+        </div>
+        <div>
+          <div class="inv-title">TAX INVOICE</div>
+          <div class="inv-meta">Invoice No: ${order.orderId}</div>
+          <div class="inv-meta">Date: ${new Date(order.orderDate || order.createdAt).toLocaleDateString('en-IN')}</div>
+        </div>
+      </div>
+      <hr>
+      <div class="section">
+        <div class="block">
+          <div class="block-title">Bill To / Ship To</div>
+          <strong>${customerName}</strong><br>
+          ${addressLine || 'N/A'}<br>
+          ${a.phoneNumber ? 'Ph: ' + a.phoneNumber : ''}
+        </div>
+        <div class="block" style="text-align:right;">
+          <div class="block-title">Payment</div>
+          Method: <strong>${order.paymentMethod || 'N/A'}</strong><br>
+          Status: <strong>${order.paymentStatus || 'Pending'}</strong><br>
+          Order Status: <strong>${order.orderStatus || 'Pending'}</strong>
+        </div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>#</th><th>Product</th><th>HSN</th><th style="text-align:center">Qty</th>
+          <th style="text-align:right">Unit (excl.)</th><th style="text-align:center">GST%</th>
+          <th style="text-align:right">GST Amt</th><th style="text-align:right">Total</th>
+        </tr></thead>
+        <tbody>${itemRowsHtml}</tbody>
+      </table>
+      <table class="totals">
+        <tr><td>Subtotal (excl. tax)</td><td style="text-align:right">₹${subtotalExclTax.toFixed(2)}</td></tr>
+        <tr><td>CGST (2.5%)</td><td style="text-align:right">₹${cgst.toFixed(2)}</td></tr>
+        <tr><td>SGST (2.5%)</td><td style="text-align:right">₹${sgst.toFixed(2)}</td></tr>
+        <tr class="grand"><td>GRAND TOTAL</td><td style="text-align:right">₹${totalAmount.toFixed(2)}</td></tr>
+      </table>
+      <div class="footer">
+        This is a computer-generated invoice. No signature required.<br>
+        Thank you for your business with LOOI Store!
+      </div>
+      <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script>
+    </body></html>`;
+
+    const w = window.open('', '_blank', 'width=900,height=700');
+    w.document.write(html);
+    w.document.close();
+  };
+
   // ── Excel export ───────────────────────────────────────────────────────────
   const handleDownloadExcel = () => {
     const formattedData = orderList.map((order) => {
@@ -259,8 +364,11 @@ const OrderListTable = () => {
                       <button title="View Details" onClick={() => handleViewDetails(order._id)}>
                         <i className="fa-light fa-eye"></i>
                       </button>
-                      <button title="Print Label" onClick={() => handlePrint(order)}>
+                      <button title="Print Shipping Label" onClick={() => handlePrint(order)}>
                         <i className="fa-light fa-print"></i>
+                      </button>
+                      <button title="Print GST Invoice" onClick={() => handlePrintInvoice(order)}>
+                        <i className="fa-light fa-file-invoice"></i>
                       </button>
                       <button title="Edit" onClick={() => openEditModal(order)}>
                         <i className="fa-light fa-pen"></i>

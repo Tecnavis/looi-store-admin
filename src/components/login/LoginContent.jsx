@@ -116,6 +116,11 @@ const LoginContent = () => {
             <button type="submit" className="btn btn-primary w-100 login-btn mt-5">
               Sign in
             </button>
+            <div className="other-option mt-3 text-center">
+              <p className="mb-0">
+                <Link to="/resetPassword">Forgot Password?</Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>
