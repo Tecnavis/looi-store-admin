@@ -43,7 +43,7 @@ const AppsPart = () => {
         Dashboard
       </Link>
       <ul className={`sidebar-link-group 
-      ${layoutPosition.horizontal ? (dropdownOpen.apps ? 'd-block' : 'd-none') : (isMainDropdownOpen ? 'd-none' : '')}
+      ${layoutPosition.horizontal ? (dropdownOpen.apps ? 'd-block' : 'd-none') : (isMainDropdownOpen ? '' : 'd-none')}
       `}>  
 
         {/* Dashboard Home */}

@@ -489,7 +489,7 @@ const DigiContextProvider = ({ children }) => {
   const initialState = {
     isMainDropdownOpen: localStorage.getItem("appState")
       ? JSON.parse(localStorage.getItem("appState")).isMainDropdownOpen
-      : false,
+      : true,
     isCrmDropdownOpen: false,
     isHrmDropdownOpen: false,
     isEcommerceDropdownOpen: false,
