@@ -271,6 +271,15 @@ const AppsPart = () => {
             <span className="sidebar-txt">Ads Banner</span>
           </NavLink>
         </li>
+        <li className="sidebar-dropdown-item">
+          <NavLink to="/marquee-banner" className="sidebar-link">
+            <span className="nav-icon">
+              <i className="fa-light fa-scroll"></i>
+            </span>{' '}
+            <span className="sidebar-txt">Promo Ticker</span>
+          </NavLink>
+        </li>
+
 
         <li className="sidebar-dropdown-item">
           <NavLink to="/addprint" className="sidebar-link">

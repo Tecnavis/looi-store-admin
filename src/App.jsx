@@ -27,6 +27,7 @@ const ViewCategory = lazy(() => import('./pages/category/ViewCategory'));
 
 const AddBanner = lazy(() => import('./pages/banner/AddBanner'));
 const AdsBanner = lazy(() => import('./pages/banner/AdsBanner'));
+const MarqueeBanner = lazy(() => import('./pages/banner/MarqueeBanner'));
 const AddPrint=lazy(()=>import('./pages/products/addprints'))
 const Order=lazy(()=>import('./pages/Order'))
 const EmailNotifications=lazy(()=>import('./pages/EmailNotifications'))
@@ -75,6 +76,7 @@ function App() {
         <Route path="/allproducts" element={<ProtectedRoute> <AllProduct/></ProtectedRoute>}/>
         <Route path="/addbanner" element={<ProtectedRoute><AddBanner/></ProtectedRoute> }/>
         <Route path="/adsbanner" element={<ProtectedRoute><AdsBanner/></ProtectedRoute> }/>
+        <Route path="/marquee-banner" element={<ProtectedRoute><MarqueeBanner/></ProtectedRoute>}/>
         <Route path="/addprint" element={<ProtectedRoute><AddPrint/></ProtectedRoute> }/>
         <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
         <Route path="/email-notifications" element={<ProtectedRoute><EmailNotifications /></ProtectedRoute>} />
