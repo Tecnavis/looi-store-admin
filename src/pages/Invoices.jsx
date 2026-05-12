@@ -17,7 +17,7 @@ const InvoicesMainContent = () => {
                             <div className="col-xl-4 col-lg-5 col-sm-6">
                                 <div className="shop-address">
                                     <div className="logo mb-20">
-                                        <img src="assets/images/logo-big.png" alt="Logo"/>
+                                        <img src="/assets/LOOInew.png" alt="Logo"/>
                                     </div>
                                     <div className="part-txt">
                                         <p className="mb-1">Address: 456 E-Commerce Avenue, Cityville, Countryland</p>
