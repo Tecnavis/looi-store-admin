@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Table, Modal, Button, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
@@ -46,6 +46,12 @@ const OrderListTable = () => {
   const [showEditModal, setShowEditModal]     = useState(false);
   const [editOrder, setEditOrder]             = useState({});
   const [printOrder, setPrintOrder]           = useState(null);
+  const [selectedOrderIds, setSelectedOrderIds] = useState(new Set());
+
+  // ── Date / week filter ───────────────────────────────────────────────────
+  const [dateFilterMode, setDateFilterMode] = useState("all"); // all | today | thisWeek | lastWeek | thisMonth | last30 | custom
+  const [customFrom, setCustomFrom]         = useState("");
+  const [customTo, setCustomTo]             = useState("");
 
   // ── Fetch orders ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -256,9 +262,25 @@ const OrderListTable = () => {
     w.document.close();
   };
 
+  // ── Selection (checkboxes) ───────────────────────────────────────────────
+  const toggleOrderSelected = (id) => {
+    setSelectedOrderIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   // ── Excel export ───────────────────────────────────────────────────────────
   const handleDownloadExcel = () => {
-    const formattedData = orderList.map((order) => {
+    // Selecting specific rows always wins; otherwise export whatever the
+    // active date/week filter currently shows (not the entire unfiltered list).
+    const ordersToExport = selectedOrderIds.size > 0
+      ? orderList.filter((o) => selectedOrderIds.has(o._id))
+      : filteredOrders;
+
+    const formattedData = ordersToExport.map((order) => {
       const a = order.shippingAddress || {};
       return {
         "Order ID":       order.orderId,
@@ -282,11 +304,82 @@ const OrderListTable = () => {
     XLSX.writeFile(wb, "LOOI_Order_List.xlsx");
   };
 
+  // ── Date / week filter helpers ───────────────────────────────────────────
+  const getDayRange = (offsetDays = 0) => {
+    const from = new Date();
+    from.setDate(from.getDate() + offsetDays);
+    from.setHours(0, 0, 0, 0);
+    const to = new Date(from);
+    to.setHours(23, 59, 59, 999);
+    return [from, to];
+  };
+
+  const getWeekRange = (offsetWeeks = 0) => {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sun ... 6 = Sat
+    const diffToMonday = (day + 6) % 7; // days since most recent Monday
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - diffToMonday + offsetWeeks * 7);
+    monday.setHours(0, 0, 0, 0);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+    return [monday, sunday];
+  };
+
+  const getMonthRange = (offsetMonths = 0) => {
+    const now = new Date();
+    const from = new Date(now.getFullYear(), now.getMonth() + offsetMonths, 1, 0, 0, 0, 0);
+    const to = new Date(now.getFullYear(), now.getMonth() + offsetMonths + 1, 0, 23, 59, 59, 999);
+    return [from, to];
+  };
+
+  const getLastNDaysRange = (n) => {
+    const to = new Date();
+    to.setHours(23, 59, 59, 999);
+    const from = new Date();
+    from.setDate(from.getDate() - (n - 1));
+    from.setHours(0, 0, 0, 0);
+    return [from, to];
+  };
+
+  // ── Apply the active date/week filter to the order list ─────────────────
+  const filteredOrders = useMemo(() => {
+    if (dateFilterMode === "all") return orderList;
+
+    let from, to;
+    switch (dateFilterMode) {
+      case "today":     [from, to] = getDayRange(0); break;
+      case "thisWeek":  [from, to] = getWeekRange(0); break;
+      case "lastWeek":  [from, to] = getWeekRange(-1); break;
+      case "thisMonth": [from, to] = getMonthRange(0); break;
+      case "last30":    [from, to] = getLastNDaysRange(30); break;
+      case "custom":
+        if (!customFrom && !customTo) return orderList;
+        from = customFrom ? new Date(`${customFrom}T00:00:00`) : new Date(0);
+        to = customTo ? new Date(`${customTo}T23:59:59`) : new Date();
+        break;
+      default:
+        return orderList;
+    }
+
+    return orderList.filter((o) => {
+      const d = new Date(o.orderDate || o.createdAt);
+      return d >= from && d <= to;
+    });
+  }, [orderList, dateFilterMode, customFrom, customTo]);
+
+  // Jump back to page 1 whenever the active filter changes so the user
+  // doesn't land on an empty/out-of-range page.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dateFilterMode, customFrom, customTo]);
+
   // ── Pagination ─────────────────────────────────────────────────────────────
   const indexOfLastData  = currentPage * dataPerPage;
   const indexOfFirstData = indexOfLastData - dataPerPage;
-  const currentData      = orderList.slice(indexOfFirstData, indexOfLastData);
-  const totalPages       = Math.ceil(orderList.length / dataPerPage);
+  const currentData      = filteredOrders.slice(indexOfFirstData, indexOfLastData);
+  const totalPages       = Math.ceil(filteredOrders.length / dataPerPage);
   const pageNumbers      = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   if (isFetching) return <div className="text-center mt-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>;
@@ -300,16 +393,99 @@ const OrderListTable = () => {
   return (
     <>
       <OverlayScrollbarsComponent>
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <button className="btn btn-sm btn-success" onClick={handleDownloadExcel}>
-            ⬇ Download Excel
-          </button>
+        {/* ── Date / week filter ─────────────────────────────────────────── */}
+        <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
+          <select
+            className="form-select form-select-sm w-auto"
+            value={dateFilterMode}
+            onChange={(e) => setDateFilterMode(e.target.value)}
+          >
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="thisWeek">This Week</option>
+            <option value="lastWeek">Last Week</option>
+            <option value="thisMonth">This Month</option>
+            <option value="last30">Last 30 Days</option>
+            <option value="custom">Custom Range</option>
+          </select>
+
+          {dateFilterMode === "custom" && (
+            <>
+              <input
+                type="date"
+                className="form-control form-control-sm w-auto"
+                value={customFrom}
+                max={customTo || undefined}
+                onChange={(e) => setCustomFrom(e.target.value)}
+              />
+              <span className="text-muted small">to</span>
+              <input
+                type="date"
+                className="form-control form-control-sm w-auto"
+                value={customTo}
+                min={customFrom || undefined}
+                onChange={(e) => setCustomTo(e.target.value)}
+              />
+            </>
+          )}
+
+          {dateFilterMode !== "all" && (
+            <button
+              className="btn btn-sm btn-link text-decoration-none"
+              onClick={() => { setDateFilterMode("all"); setCustomFrom(""); setCustomTo(""); }}
+            >
+              Clear filter
+            </button>
+          )}
+
+          <span className="text-muted small ms-auto">
+            {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+          </span>
         </div>
 
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="d-flex align-items-center gap-3">
+            <button className="btn btn-sm btn-success" onClick={handleDownloadExcel}>
+              ⬇ Download Excel{selectedOrderIds.size > 0 ? ` (${selectedOrderIds.size} selected)` : ""}
+            </button>
+            {selectedOrderIds.size > 0 && (
+              <button
+                className="btn btn-sm btn-link text-decoration-none"
+                onClick={() => setSelectedOrderIds(new Set())}
+              >
+                Clear selection
+              </button>
+            )}
+          </div>
+        </div>
+
+        {filteredOrders.length === 0 && (
+          <div className="text-center py-5">
+            <h5 className="text-muted">No orders match the selected period</h5>
+          </div>
+        )}
+
+        {filteredOrders.length > 0 && (
         <Table className="table table-dashed table-hover digi-dataTable all-product-table table-striped" id="allProductTable">
           <thead>
             <tr>
-              <th><div className="form-check"><input className="form-check-input" type="checkbox" /></div></th>
+              <th>
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={currentData.length > 0 && currentData.every((o) => selectedOrderIds.has(o._id))}
+                    onChange={(e) => {
+                      setSelectedOrderIds((prev) => {
+                        const next = new Set(prev);
+                        if (e.target.checked) currentData.forEach((o) => next.add(o._id));
+                        else currentData.forEach((o) => next.delete(o._id));
+                        return next;
+                      });
+                    }}
+                  />
+                </div>
+              </th>
               <th>Order ID</th>
               <th>Customer</th>
               <th>Address</th>
@@ -327,7 +503,16 @@ const OrderListTable = () => {
               const name = [a.firstName, a.lastName].filter(Boolean).join(" ") || order.user?.name || "—";
               return (
                 <tr key={order._id}>
-                  <td><div className="form-check"><input className="form-check-input" type="checkbox" /></div></td>
+                  <td>
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        checked={selectedOrderIds.has(order._id)}
+                        onChange={() => toggleOrderSelected(order._id)}
+                      />
+                    </div>
+                  </td>
 
                   <td><Link to={`/invoices/${order.orderId}`} style={{ fontWeight: 700 }}>{order.orderId}</Link></td>
 
@@ -390,9 +575,12 @@ const OrderListTable = () => {
             })}
           </tbody>
         </Table>
+        )}
       </OverlayScrollbarsComponent>
 
-      <PaginationSection currentPage={currentPage} totalPages={totalPages} paginate={setCurrentPage} pageNumbers={pageNumbers} />
+      {filteredOrders.length > 0 && (
+        <PaginationSection currentPage={currentPage} totalPages={totalPages} paginate={setCurrentPage} pageNumbers={pageNumbers} />
+      )}
 
       {/* ── Edit Modal ─────────────────────────────────────────────────────── */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
