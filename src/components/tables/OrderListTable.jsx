@@ -284,11 +284,13 @@ const OrderListTable = () => {
       const a = order.shippingAddress || {};
       return {
         "Order ID":       order.orderId,
-        "Customer Name":  [a.firstName, a.lastName].filter(Boolean).join(" ") || order.user?.name || "N/A",
+        "Addressee":      [a.firstName, a.lastName].filter(Boolean).join(" ") || order.user?.name || "N/A",
         "Customer Email": order.user?.email || order.email || "N/A",
         "Phone":          a.phoneNumber || "N/A",
-        "Address":        [a.houseBuilding, a.streetArea, a.landmark].filter(Boolean).join(", ") || "N/A",
-        "District":       a.cityDistrict || "N/A",
+        "Add-1":          a.houseBuilding || "N/A",
+        "Add-2":          a.streetArea || "N/A",
+        "Add-3":          a.landmark || "N/A",
+        "City":           a.cityDistrict || "N/A",
         "State":          a.state || "N/A",
         "Pincode":        a.postalCode || "N/A",
         "Order Status":   order.orderStatus,
