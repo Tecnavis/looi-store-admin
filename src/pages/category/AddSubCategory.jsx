@@ -99,6 +99,12 @@ const AddSubCategory = () => {
 
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
+            MySwal.fire({
+                title: 'Missing required fields',
+                text: 'Please fill in all fields marked with * before submitting.',
+                icon: 'warning',
+                confirmButtonColor: '#037fe0',
+            });
             return;
         }
        
@@ -194,9 +200,9 @@ const AddSubCategory = () => {
                             <div className="row g-3">
                                 {/* Category Dropdown */}
                                 <div className="col-12">
-                                    <label className="form-label">Category</label>
+                                    <label className="form-label">Category <span className="text-danger">*</span></label>
                                     <select 
-                                        className="form-control form-control-sm" 
+                                        className={`form-control form-control-sm ${errors.selectedCategory ? 'is-invalid' : ''}`} 
                                         name="selectedCategory"
                                         value={selectedCategory}
                                         onChange={handleChange}
@@ -213,9 +219,9 @@ const AddSubCategory = () => {
 
                                 {/* Main Category Dropdown */}
                                 <div className="col-12 mt-4">
-                                    <label className="form-label">Main Category</label>
+                                    <label className="form-label">Main Category <span className="text-danger">*</span></label>
                                     <select 
-                                        className="form-control form-control-sm" 
+                                        className={`form-control form-control-sm ${errors.selectedMainCategory ? 'is-invalid' : ''}`} 
                                         name="selectedMainCategory"
                                         value={selectedMainCategory}
                                         onChange={handleChange}
@@ -233,10 +239,10 @@ const AddSubCategory = () => {
 
                                 {/* Subcategory Name Input */}
                                 <div className="col-12 mt-4">
-                                    <label className="form-label">Sub Category Name</label>
+                                    <label className="form-label">Sub Category Name <span className="text-danger">*</span></label>
                                     <input 
                                         type="text" 
-                                        className="form-control form-control-sm" 
+                                        className={`form-control form-control-sm ${errors.categoryTitle ? 'is-invalid' : ''}`} 
                                         name="categoryTitle"
                                         value={categoryTitle}
                                         onChange={handleChange}

@@ -126,10 +126,10 @@ const AddCategory = () => {
             <form onSubmit={handleSubmit}>
               <div className="row g-3">
                 <div className="col-12">
-                  <label className="form-label">Category Name</label>
+                  <label className="form-label">Category Name <span className="text-danger">*</span></label>
                   <input 
                     type="text" 
-                    className="form-control form-control-sm" 
+                    className={`form-control form-control-sm ${error ? 'is-invalid' : ''}`} 
                     id="categoryTitle" 
                     onChange={handleChange} 
                     value={categoryTitle} // Ensure controlled component

@@ -33,6 +33,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'variants'
   const [editingCell, setEditingCell] = useState(null); // { sizeIndex, colorIndex, field }
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -40,7 +41,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
       const token = localStorage.getItem('token');
       setLoading(true);
       try {
-        const response = await axiosInstance.get(`/get-productid/${productId}`, {
+        const response = await axiosInstance.get(`/get-product/${productId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const d = response.data.product;
@@ -73,6 +74,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
     if (show && productId) {
       setActiveTab('basic');
       setEditingCell(null);
+      setFieldErrors({});
       fetchProduct();
     }
   }, [show, productId]);
@@ -80,6 +82,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   // Inline table editing
@@ -141,8 +144,32 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
     }
   };
 
+  const validateBasicInfo = () => {
+    const errors = {};
+    if (!formData.name.trim()) errors.name = 'Product name is required';
+    if (formData.price === '' || Number(formData.price) <= 0) errors.price = 'Price is required';
+    if (formData.length !== '' && Number(formData.length) < 0) errors.length = 'Length cannot be negative';
+    if (formData.width !== '' && Number(formData.width) < 0) errors.width = 'Width cannot be negative';
+    if (formData.height !== '' && Number(formData.height) < 0) errors.height = 'Height cannot be negative';
+    if (formData.weight !== '' && Number(formData.weight) < 0) errors.weight = 'Weight cannot be negative';
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errors = validateBasicInfo();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setActiveTab('basic');
+      MySwal.fire({
+        title: 'Missing required fields',
+        text: 'Please fill in all fields marked with * before submitting.',
+        icon: 'warning',
+        confirmButtonColor: '#037fe0',
+      });
+      return;
+    }
+    setFieldErrors({});
     const token = localStorage.getItem('token');
     const updatedFormData = new FormData();
     setSubmitting(true);
@@ -177,7 +204,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
       MySwal.fire({ title: 'Success', text: 'Product updated successfully', icon: 'success' });
       handleClose();
     } catch (err) {
-      MySwal.fire({ title: 'Error', text: 'Failed to update product', icon: 'error' });
+      MySwal.fire({ title: 'Error', text: err.response?.data?.message || 'Failed to update product', icon: 'error' });
     } finally {
       setSubmitting(false);
     }
@@ -274,11 +301,13 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
               <Row className="g-3">
                 <Col md={6}>
                   <Form.Label className="fw-medium">Product Name <span className="text-danger">*</span></Form.Label>
-                  <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} required />
+                  <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} isInvalid={!!fieldErrors.name} required />
+                  <Form.Control.Feedback type="invalid">{fieldErrors.name}</Form.Control.Feedback>
                 </Col>
                 <Col md={6}>
                   <Form.Label className="fw-medium">Price (₹) <span className="text-danger">*</span></Form.Label>
-                  <Form.Control type="number" name="price" value={formData.price} onChange={handleChange} required min="0" />
+                  <Form.Control type="number" name="price" value={formData.price} onChange={handleChange} isInvalid={!!fieldErrors.price} required min="0" />
+                  <Form.Control.Feedback type="invalid">{fieldErrors.price}</Form.Control.Feedback>
                 </Col>
                 <Col md={6}>
                   <Form.Label className="fw-medium">Country of Origin</Form.Label>
@@ -304,19 +333,23 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
                 <Row className="g-3">
                   <Col md={3}>
                     <Form.Label className="fw-medium">Length (cm)</Form.Label>
-                    <Form.Control type="number" name="length" value={formData.length} onChange={handleChange} min="0" step="0.1" />
+                    <Form.Control type="number" name="length" value={formData.length} onChange={handleChange} isInvalid={!!fieldErrors.length} min="0" step="0.1" />
+                    <Form.Control.Feedback type="invalid">{fieldErrors.length}</Form.Control.Feedback>
                   </Col>
                   <Col md={3}>
                     <Form.Label className="fw-medium">Width (cm)</Form.Label>
-                    <Form.Control type="number" name="width" value={formData.width} onChange={handleChange} min="0" step="0.1" />
+                    <Form.Control type="number" name="width" value={formData.width} onChange={handleChange} isInvalid={!!fieldErrors.width} min="0" step="0.1" />
+                    <Form.Control.Feedback type="invalid">{fieldErrors.width}</Form.Control.Feedback>
                   </Col>
                   <Col md={3}>
                     <Form.Label className="fw-medium">Height (cm)</Form.Label>
-                    <Form.Control type="number" name="height" value={formData.height} onChange={handleChange} min="0" step="0.1" />
+                    <Form.Control type="number" name="height" value={formData.height} onChange={handleChange} isInvalid={!!fieldErrors.height} min="0" step="0.1" />
+                    <Form.Control.Feedback type="invalid">{fieldErrors.height}</Form.Control.Feedback>
                   </Col>
                   <Col md={3}>
                     <Form.Label className="fw-medium">Weight (kg)</Form.Label>
-                    <Form.Control type="number" name="weight" value={formData.weight} onChange={handleChange} min="0" step="0.01" />
+                    <Form.Control type="number" name="weight" value={formData.weight} onChange={handleChange} isInvalid={!!fieldErrors.weight} min="0" step="0.01" />
+                    <Form.Control.Feedback type="invalid">{fieldErrors.weight}</Form.Control.Feedback>
                   </Col>
                 </Row>
               </div>

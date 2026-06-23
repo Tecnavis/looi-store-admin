@@ -82,12 +82,19 @@ const ProductRow = ({ data, onEdit, onDelete }) => {
 
 const AllProductTable = () => {
   const [products, setProducts] = useState([]);
+  const [mainCategories, setMainCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [dataPerPage] = useState(10);
+  const [dataPerPage, setDataPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+
+  // ── Filter state ───────────────────────────────────────────────────────────
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [stockFilter, setStockFilter] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -103,7 +110,19 @@ const AllProductTable = () => {
         setLoading(false);
       }
     };
+    const fetchMainCategories = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axiosInstance.get('/get-maincategory', {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        });
+        setMainCategories(Array.isArray(response.data) ? response.data : []);
+      } catch (err) {
+        console.log('error fetching main categories', err);
+      }
+    };
     fetchProducts();
+    fetchMainCategories();
   }, []);
 
   if (loading) return (
@@ -144,14 +163,138 @@ const AllProductTable = () => {
     }
   };
 
+  // Helper to read a possibly-populated-or-not maincategory field
+  const getMainCategoryId = (p) => {
+    if (!p.maincategory) return '';
+    return typeof p.maincategory === 'object' ? p.maincategory._id : p.maincategory;
+  };
+
+  // ── Apply filters + search + sort (client-side, over the full fetched list) ─
+  let filteredProducts = products.filter((p) => {
+    const matchesSearch =
+      !searchTerm ||
+      p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.productId?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = !categoryFilter || getMainCategoryId(p) === categoryFilter;
+
+    const matchesStock =
+      !stockFilter ||
+      (stockFilter === 'in' && p.totalStock > 0) ||
+      (stockFilter === 'out' && p.totalStock <= 0);
+
+    return matchesSearch && matchesCategory && matchesStock;
+  });
+
+  filteredProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case 'priceLow': return (a.price || 0) - (b.price || 0);
+      case 'priceHigh': return (b.price || 0) - (a.price || 0);
+      case 'nameAZ': return (a.name || '').localeCompare(b.name || '');
+      case 'stockLow': return (a.totalStock || 0) - (b.totalStock || 0);
+      case 'newest':
+      default:
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    }
+  });
+
+  const hasActiveFilters = searchTerm || categoryFilter || stockFilter;
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setCategoryFilter('');
+    setStockFilter('');
+    setSortBy('newest');
+    setCurrentPage(1);
+  };
+
   const indexOfLastData = currentPage * dataPerPage;
   const indexOfFirstData = indexOfLastData - dataPerPage;
-  const currentData = products.slice(indexOfFirstData, indexOfLastData);
-  const totalPages = Math.ceil(products.length / dataPerPage);
+  const currentData = filteredProducts.slice(indexOfFirstData, indexOfLastData);
+  const totalPages = Math.ceil(filteredProducts.length / dataPerPage);
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <>
+      {/* ── Filter bar ── */}
+      <div className="table-filter-option all-products-table-header mb-3">
+        <div className="row g-2 align-items-center">
+          <div className="col-lg-3 col-md-6 col-12">
+            <div className="input-group input-group-sm">
+              <span className="input-group-text bg-transparent"><i className="fa-light fa-magnifying-glass"></i></span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search by name or product ID..."
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              />
+            </div>
+          </div>
+          <div className="col-lg-2 col-md-6 col-6">
+            <select
+              className="form-select form-select-sm"
+              value={categoryFilter}
+              onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
+            >
+              <option value="">All Categories</option>
+              {mainCategories.map((cat) => (
+                <option key={cat._id} value={cat._id}>{cat.mainCategoryName}</option>
+              ))}
+            </select>
+          </div>
+          <div className="col-lg-2 col-md-6 col-6">
+            <select
+              className="form-select form-select-sm"
+              value={stockFilter}
+              onChange={(e) => { setStockFilter(e.target.value); setCurrentPage(1); }}
+            >
+              <option value="">All Stock</option>
+              <option value="in">In Stock</option>
+              <option value="out">Out of Stock</option>
+            </select>
+          </div>
+          <div className="col-lg-2 col-md-6 col-6">
+            <select
+              className="form-select form-select-sm"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="newest">Newest First</option>
+              <option value="priceLow">Price: Low to High</option>
+              <option value="priceHigh">Price: High to Low</option>
+              <option value="nameAZ">Name: A-Z</option>
+              <option value="stockLow">Stock: Low to High</option>
+            </select>
+          </div>
+          <div className="col-lg-1 col-md-6 col-6">
+            {hasActiveFilters && (
+              <button className="btn btn-sm btn-outline-secondary w-100" onClick={handleResetFilters} title="Reset filters">
+                <i className="fa-light fa-rotate-left"></i> Reset
+              </button>
+            )}
+          </div>
+          <div className="col-lg-2 col-md-6 col-12 d-flex justify-content-end align-items-center gap-2">
+            <label className="text-muted small mb-0" style={{ whiteSpace: 'nowrap' }}>Show</label>
+            <select
+              className="form-select form-select-sm"
+              style={{ width: '70px' }}
+              value={dataPerPage}
+              onChange={(e) => { setDataPerPage(Number(e.target.value)); setCurrentPage(1); }}
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+        </div>
+        {hasActiveFilters && (
+          <p className="text-muted small mt-2 mb-0">
+            Showing {filteredProducts.length} of {products.length} products
+          </p>
+        )}
+      </div>
+
       <OverlayScrollbarsComponent>
         <Table className="table table-dashed table-hover digi-dataTable all-product-table table-striped" id="allProductTable">
           <thead>
@@ -169,8 +312,10 @@ const AllProductTable = () => {
             </tr>
           </thead>
           <tbody>
-            {products.length === 0
-              ? (<tr><td colSpan="10" className="text-center py-4 text-muted">No products have been added yet.</td></tr>)
+            {filteredProducts.length === 0
+              ? (<tr><td colSpan="10" className="text-center py-4 text-muted">
+                  {products.length === 0 ? 'No products have been added yet.' : 'No products match the current filters.'}
+                </td></tr>)
               : currentData.map((data) => (
                   <ProductRow key={data._id} data={data} onEdit={handleEditButtonClick} onDelete={handleDelete} />
                 ))}

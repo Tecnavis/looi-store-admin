@@ -58,9 +58,12 @@ const DigiContextProvider = ({ children }) => {
 
   //theme button
   // Theme Selection
+  // Default is now "light" (was "default"/blue-dark) per request to make
+  // light mode the out-of-the-box experience. The user's last choice is
+  // still persisted to localStorage and restored on reload below.
   const [themeSelection, setThemeSelection] = useState({
-    default: true,
-    light: false,
+    default: false,
+    light: true,
     dark: false,
   });
 
@@ -215,9 +218,46 @@ const DigiContextProvider = ({ children }) => {
   };
 
   // Light Theme
-  const [isLightTheme, setIsLightTheme] = useState(false);
+  const [isLightTheme, setIsLightTheme] = useState(true);
   const bodyElement = document.body;
   const divElement = document.querySelector(".body-padding");
+
+  // Apply + persist the active theme on mount. Reads any previously saved
+  // choice from localStorage; if none exists yet, light mode (the new
+  // default) is applied and saved.
+  useEffect(() => {
+    const saved = localStorage.getItem("digi-theme") || "light";
+    const body = document.body;
+    const wrapper = document.querySelector(".body-padding");
+
+    body.classList.remove("light-theme", "dark-theme");
+    wrapper?.classList.remove("light-theme", "dark-theme", "blue-theme");
+
+    if (saved === "dark") {
+      body.classList.add("dark-theme");
+      wrapper?.classList.add("dark-theme");
+      setIsLightTheme(false);
+      setIsDarkTheme(true);
+      setThemeSelection({ default: false, light: false, dark: true });
+    } else if (saved === "default") {
+      wrapper?.classList.add("blue-theme");
+      setIsLightTheme(false);
+      setIsDarkTheme(false);
+      setThemeSelection({ default: true, light: false, dark: false });
+    } else {
+      body.classList.add("light-theme");
+      wrapper?.classList.add("light-theme");
+      setIsLightTheme(true);
+      setIsDarkTheme(false);
+      setThemeSelection({ default: false, light: true, dark: false });
+    }
+
+    if (!localStorage.getItem("digi-theme")) {
+      localStorage.setItem("digi-theme", "light");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleLightThemeToggle = () => {
     setThemeSelection({ default: false, dark: false, light: (prev) => !prev });
     setIsDarkTheme(false);
@@ -239,6 +279,7 @@ const DigiContextProvider = ({ children }) => {
       divElement.classList.remove("light-theme");
     }
 
+    localStorage.setItem("digi-theme", bodyElement.classList.contains("light-theme") ? "light" : "default");
     handleThemeSelection("light");
   };
 
@@ -262,6 +303,7 @@ const DigiContextProvider = ({ children }) => {
       divElement.classList.remove("blue-theme");
     }
 
+    localStorage.setItem("digi-theme", bodyElement.classList.contains("dark-theme") ? "dark" : "light");
     handleThemeSelection("dark");
   };
 
@@ -276,6 +318,7 @@ const DigiContextProvider = ({ children }) => {
     divElement.classList.remove("light-theme", "dark-theme");
     divElement.classList.add("blue-theme");
 
+    localStorage.setItem("digi-theme", "default");
     handleThemeSelection("default");
   };
 

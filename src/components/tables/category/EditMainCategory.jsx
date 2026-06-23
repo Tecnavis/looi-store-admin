@@ -8,9 +8,15 @@ const MySwal = withReactContent(Swal);
 
 const EditMainCategory = ({ show, handleClose, category, onEdit }) => {
     const [mainCategoryName, setMainCategoryName] = useState(category.mainCategoryName || '');
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!mainCategoryName.trim()) {
+            setError('Category name is required');
+            return;
+        }
+        setError('');
         const token = localStorage.getItem('token');
         try {
             await axiosInstance.put(`/update-maincategoryid/${category._id}`, { mainCategoryName }, {
@@ -40,6 +46,7 @@ const EditMainCategory = ({ show, handleClose, category, onEdit }) => {
            
         } catch (err) {
             console.error('Error updating category:', err);
+            MySwal.fire({ text: err.response?.data?.message || 'Failed to update category', icon: 'error' });
         }
     };
 
@@ -51,13 +58,15 @@ const EditMainCategory = ({ show, handleClose, category, onEdit }) => {
             <Modal.Body>
                 <Form onSubmit={handleSubmit}>
                     <Form.Group controlId="formMainCategoryName">
-                        <Form.Label>Category Name</Form.Label>
+                        <Form.Label>Category Name <span className="text-danger">*</span></Form.Label>
                         <Form.Control
                             type="text"
                             value={mainCategoryName}
-                            onChange={(e) => setMainCategoryName(e.target.value)}
+                            onChange={(e) => { setMainCategoryName(e.target.value); if (error) setError(''); }}
+                            isInvalid={!!error}
                             required
                         />
+                        <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>
                     </Form.Group>
                     <Button variant="primary" type="submit" className='mt-3'>
                         Save Changes

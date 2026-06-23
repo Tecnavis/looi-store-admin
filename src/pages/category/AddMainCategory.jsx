@@ -25,7 +25,8 @@ const AddMainCategory = () => {
     setSelectedMainCategory('');
     setSelectedFiles([]);
     setPreviewImages([]);
-    setError('');
+    setCategoryTitleError('');
+    setMainCategoryError('');
   };
 
     const handleShowThumbnail = () => {
@@ -81,17 +82,21 @@ const AddMainCategory = () => {
   };
 
   const handleSubmit = async (e) => {
-      const validationErrors = {};
       e.preventDefault();
-     
-      if (!categoryTitle) validationErrors.categoryTitle = 'Main Category name is required';
-      if (!selectedMainCategory) validationErrors.selectedMainCategory = 'Category is required';
+      let hasError = false;
 
-    
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
+      if (!categoryTitle) { setCategoryTitleError('Main Category name is required'); hasError = true; }
+      if (!selectedMainCategory) { setMainCategoryError('Category is required'); hasError = true; }
+
+      if (hasError) {
+        MySwal.fire({
+          title: 'Missing required fields',
+          text: 'Please fill in all fields marked with * before submitting.',
+          icon: 'warning',
+          confirmButtonColor: '#037fe0',
+        });
         return;
-    }
+      }
 
       const token = localStorage.getItem('token');
       const formData = new FormData();
@@ -180,9 +185,9 @@ if (loading) {
                         <form onSubmit={handleSubmit}>
                             <div className="row g-3">
                                 <div className="col-12 mt-4">
-                                    <label className="form-label">Category</label>
+                                    <label className="form-label">Category <span className="text-danger">*</span></label>
                                     <select
-                                        className="form-control form-control-sm"
+                                        className={`form-control form-control-sm ${mainCategoryError ? 'is-invalid' : ''}`}
                                         value={selectedMainCategory}
                                         onChange={handleMainCategoryChange}
                                     >
@@ -196,10 +201,10 @@ if (loading) {
                                     {mainCategoryError && <p style={{fontSize:'12px'}} className="text-danger">{mainCategoryError}</p>}
                                 </div>
                                 <div className="col-12 mt-4">
-                                    <label className="form-label">Main Category</label>
+                                    <label className="form-label">Main Category <span className="text-danger">*</span></label>
                                     <input
                                         type="text"
-                                        className="form-control form-control-sm"
+                                        className={`form-control form-control-sm ${categoryTitleError ? 'is-invalid' : ''}`}
                                         id="categoryTitle"
                                         value={categoryTitle}
                                         onChange={handleCategoryTitleChange}

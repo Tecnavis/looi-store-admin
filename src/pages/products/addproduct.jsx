@@ -71,6 +71,7 @@ const AddProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (error[name]) setError((prev) => ({ ...prev, [name]: undefined }));
     if (name === 'currentSize') {
       setCurrentSize(value);
     } else if (name === 'subcategory') {
@@ -82,6 +83,7 @@ const AddProduct = () => {
           subcategory: value,
           maincategory: selectedSubcategory.category.maincategoriesData,
         }));
+        if (error.maincategory) setError((prev) => ({ ...prev, maincategory: undefined }));
       } else {
         setSelectedCategory(null);
         setFormData((prev) => ({ ...prev, subcategory: value, maincategory: '' }));
@@ -94,6 +96,7 @@ const AddProduct = () => {
   const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
     setCoverImage(file || null);
+    if (file && error.coverImage) setError((prev) => ({ ...prev, coverImage: undefined }));
   };
 
   const handleFileChange = (e) => {
@@ -150,7 +153,7 @@ const AddProduct = () => {
       setCurrentStock('');
       setCurrentImages([]);
       if (imageInputRef.current) imageInputRef.current.value = null;
-      setError((prev) => ({ ...prev, size: null }));
+      setError((prev) => ({ ...prev, size: null, sizes: undefined }));
     } else {
       setError({ size: 'Please fill in Size, Color, and Stock (images are optional).' });
     }
@@ -215,8 +218,39 @@ const AddProduct = () => {
     setError({});
   };
 
+  // Mirrors the server's actual required fields (productModel.js) so the
+  // form catches problems before a failed API round-trip.
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.name.trim()) errors.name = 'Product name is required';
+    if (!formData.price || Number(formData.price) <= 0) errors.price = 'Selling price is required';
+    if (!formData.oldPrice || Number(formData.oldPrice) <= 0) errors.oldPrice = 'Old price is required';
+    if (!coverImage) errors.coverImage = 'Cover image is required';
+    if (!formData.hsn.trim()) errors.hsn = 'HSN code is required';
+    if (!formData.sku.trim()) errors.sku = 'SKU is required';
+    if (!formData.subcategory) errors.subcategory = 'Sub category is required';
+    if (!formData.maincategory) errors.maincategory = 'Main category is required (pick a sub category first)';
+    if (formData.height === '' || Number(formData.height) < 0) errors.height = 'Height is required';
+    if (formData.width === '' || Number(formData.width) < 0) errors.width = 'Width is required';
+    if (formData.length === '' || Number(formData.length) < 0) errors.length = 'Length is required';
+    if (formData.weight === '' || Number(formData.weight) < 0) errors.weight = 'Weight is required';
+    if (formData.sizes.length === 0) errors.sizes = 'Add at least one size/color variant with stock';
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setError(validationErrors);
+      MySwal.fire({
+        title: 'Missing required fields',
+        text: 'Please fill in all fields marked with * before submitting.',
+        icon: 'warning',
+        confirmButtonColor: '#037fe0',
+      });
+      return;
+    }
     setError({});
     setLoading(true);
     try {
@@ -320,36 +354,42 @@ const AddProduct = () => {
                 <input type="text" className="form-control" name="countryOfOrigin" value={formData.countryOfOrigin} onChange={handleChange} placeholder="e.g. India" />
               </div>
               <div className="col-md-3">
-                <label className="form-label fw-medium">Old Price (₹)</label>
-                <input type="number" className="form-control" name="oldPrice" value={formData.oldPrice} onChange={handleChange} placeholder="0" min="0" />
+                <label className="form-label fw-medium">Old Price (₹) <span className="text-danger">*</span></label>
+                <input type="number" className={`form-control ${error.oldPrice ? 'is-invalid' : ''}`} name="oldPrice" value={formData.oldPrice} onChange={handleChange} placeholder="0" min="0" required />
+                {error.oldPrice && <div className="invalid-feedback">{error.oldPrice}</div>}
               </div>
               <div className="col-md-3">
                 <label className="form-label fw-medium">Selling Price (₹) <span className="text-danger">*</span></label>
-                <input type="number" className="form-control" name="price" value={formData.price} onChange={handleChange} placeholder="0" min="0" required />
+                <input type="number" className={`form-control ${error.price ? 'is-invalid' : ''}`} name="price" value={formData.price} onChange={handleChange} placeholder="0" min="0" required />
+                {error.price && <div className="invalid-feedback">{error.price}</div>}
               </div>
               <div className="col-md-3">
-                <label className="form-label fw-medium">HSN Code</label>
-                <input type="number" className="form-control" name="hsn" value={formData.hsn} onChange={handleChange} placeholder="e.g. 6109" />
+                <label className="form-label fw-medium">HSN Code <span className="text-danger">*</span></label>
+                <input type="number" className={`form-control ${error.hsn ? 'is-invalid' : ''}`} name="hsn" value={formData.hsn} onChange={handleChange} placeholder="e.g. 6109" required />
+                {error.hsn && <div className="invalid-feedback">{error.hsn}</div>}
               </div>
               <div className="col-md-3">
-                <label className="form-label fw-medium">SKU</label>
-                <input type="number" className="form-control" name="sku" value={formData.sku} onChange={handleChange} placeholder="e.g. 10012" />
+                <label className="form-label fw-medium">SKU <span className="text-danger">*</span></label>
+                <input type="number" className={`form-control ${error.sku ? 'is-invalid' : ''}`} name="sku" value={formData.sku} onChange={handleChange} placeholder="e.g. 10012" required />
+                {error.sku && <div className="invalid-feedback">{error.sku}</div>}
               </div>
 
               {/* Categories */}
               <div className="col-md-6">
-                <label className="form-label fw-medium">Sub Category</label>
-                <select className="form-select" name="subcategory" value={formData.subcategory} onChange={handleChange}>
+                <label className="form-label fw-medium">Sub Category <span className="text-danger">*</span></label>
+                <select className={`form-select ${error.subcategory ? 'is-invalid' : ''}`} name="subcategory" value={formData.subcategory} onChange={handleChange} required>
                   <option value="">Select Sub Category</option>
                   {subCategories.map((subcategory) => (
                     <option key={subcategory._id} value={subcategory._id}>{subcategory.subcategoryname}</option>
                   ))}
                 </select>
+                {error.subcategory && <div className="invalid-feedback">{error.subcategory}</div>}
               </div>
               <div className="col-md-6">
-                <label className="form-label fw-medium">Main Category</label>
-                <input type="text" className="form-control" value={selectedCategory ? selectedCategory.name : ''} disabled placeholder="Auto-filled from sub category" />
+                <label className="form-label fw-medium">Main Category <span className="text-danger">*</span></label>
+                <input type="text" className={`form-control ${error.maincategory ? 'is-invalid' : ''}`} value={selectedCategory ? selectedCategory.name : ''} disabled placeholder="Auto-filled from sub category" />
                 <input type="hidden" name="maincategory" value={formData.maincategory} />
+                {error.maincategory && <div className="invalid-feedback d-block">{error.maincategory}</div>}
               </div>
 
               {/* Manufacturer info */}
@@ -368,23 +408,27 @@ const AddProduct = () => {
 
               {/* Dimensions */}
               <div className="col-12">
-                <label className="form-label fw-medium text-muted small text-uppercase">Shipping Dimensions</label>
+                <label className="form-label fw-medium text-muted small text-uppercase">Shipping Dimensions <span className="text-danger">*</span></label>
               </div>
               <div className="col-md-3">
-                <label className="form-label fw-medium">Height (cm)</label>
-                <input type="number" className="form-control" name="height" value={formData.height} onChange={handleChange} placeholder="0" min="0" step="0.1" />
+                <label className="form-label fw-medium">Height (cm) <span className="text-danger">*</span></label>
+                <input type="number" className={`form-control ${error.height ? 'is-invalid' : ''}`} name="height" value={formData.height} onChange={handleChange} placeholder="0" min="0" step="0.1" required />
+                {error.height && <div className="invalid-feedback">{error.height}</div>}
               </div>
               <div className="col-md-3">
-                <label className="form-label fw-medium">Width (cm)</label>
-                <input type="number" className="form-control" name="width" value={formData.width} onChange={handleChange} placeholder="0" min="0" step="0.1" />
+                <label className="form-label fw-medium">Width (cm) <span className="text-danger">*</span></label>
+                <input type="number" className={`form-control ${error.width ? 'is-invalid' : ''}`} name="width" value={formData.width} onChange={handleChange} placeholder="0" min="0" step="0.1" required />
+                {error.width && <div className="invalid-feedback">{error.width}</div>}
               </div>
               <div className="col-md-3">
-                <label className="form-label fw-medium">Length (cm)</label>
-                <input type="number" className="form-control" name="length" value={formData.length} onChange={handleChange} placeholder="0" min="0" step="0.1" />
+                <label className="form-label fw-medium">Length (cm) <span className="text-danger">*</span></label>
+                <input type="number" className={`form-control ${error.length ? 'is-invalid' : ''}`} name="length" value={formData.length} onChange={handleChange} placeholder="0" min="0" step="0.1" required />
+                {error.length && <div className="invalid-feedback">{error.length}</div>}
               </div>
               <div className="col-md-3">
-                <label className="form-label fw-medium">Weight (kg)</label>
-                <input type="number" className="form-control" name="weight" value={formData.weight} onChange={handleChange} placeholder="0" min="0" step="0.01" />
+                <label className="form-label fw-medium">Weight (kg) <span className="text-danger">*</span></label>
+                <input type="number" className={`form-control ${error.weight ? 'is-invalid' : ''}`} name="weight" value={formData.weight} onChange={handleChange} placeholder="0" min="0" step="0.01" required />
+                {error.weight && <div className="invalid-feedback">{error.weight}</div>}
               </div>
 
               {/* Description */}
@@ -393,15 +437,14 @@ const AddProduct = () => {
                 <textarea className="form-control" name="description" value={formData.description} onChange={handleChange} rows={3} placeholder="Product description..." />
               </div>
 
-              {/* Cover Image — OPTIONAL */}
+              {/* Cover Image — REQUIRED by the server */}
               <div className="col-md-4">
                 <label className="form-label fw-medium">
-                  Cover Image
-                  <span className="badge bg-secondary ms-2" style={{ fontSize: '10px', fontWeight: '400' }}>Optional</span>
+                  Cover Image <span className="text-danger">*</span>
                 </label>
                 <div
-                  className="border rounded d-flex flex-column align-items-center justify-content-center text-center p-3"
-                  style={{ minHeight: '120px', borderStyle: 'dashed !important', cursor: 'pointer', borderColor: '#6c757d', borderStyle: 'dashed' }}
+                  className={`border rounded d-flex flex-column align-items-center justify-content-center text-center p-3 ${error.coverImage ? 'border-danger' : ''}`}
+                  style={{ minHeight: '120px', cursor: 'pointer', borderColor: error.coverImage ? '#dc3545' : '#6c757d', borderStyle: 'dashed' }}
                   onClick={() => coverImageRef.current?.click()}
                 >
                   {coverImage ? (
@@ -425,6 +468,7 @@ const AddProduct = () => {
                     </>
                   )}
                 </div>
+                {error.coverImage && <div className="invalid-feedback d-block">{error.coverImage}</div>}
                 <input type="file" ref={coverImageRef} className="d-none" name="coverImage" accept=".jpg,.jpeg,.png" onChange={handleCoverImageChange} />
               </div>
             </div>
@@ -528,7 +572,7 @@ const AddProduct = () => {
           <div className="card-header border-0 py-3 px-4 d-flex align-items-center justify-content-between" style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px 12px 0 0' }}>
             <h5 className="mb-0 fw-semibold">
               <span className="badge bg-primary me-2" style={{ width: '26px', height: '26px', lineHeight: '26px', borderRadius: '50%', fontSize: '12px' }}>4</span>
-              Product Variants
+              Product Variants <span className="text-danger">*</span>
             </h5>
             {formData.sizes.length > 0 && (
               <div className="d-flex gap-3">
@@ -542,6 +586,12 @@ const AddProduct = () => {
             )}
           </div>
           <div className="card-body p-0">
+            {error.sizes && (
+              <div className="alert alert-danger d-flex align-items-center m-3 py-2 mb-0" role="alert">
+                <i className="fa-light fa-triangle-exclamation me-2"></i>
+                {error.sizes}
+              </div>
+            )}
             {formData.sizes.length === 0 ? (
               <div className="text-center py-5">
                 <i className="fa-light fa-layer-group fa-3x text-muted mb-3 d-block"></i>

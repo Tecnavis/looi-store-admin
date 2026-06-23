@@ -52,6 +52,8 @@ const OrderListTable = () => {
   const [dateFilterMode, setDateFilterMode] = useState("all"); // all | today | thisWeek | lastWeek | thisMonth | last30 | custom
   const [customFrom, setCustomFrom]         = useState("");
   const [customTo, setCustomTo]             = useState("");
+  const [orderSearchTerm, setOrderSearchTerm] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState("");
 
   // ── Fetch orders ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -72,12 +74,19 @@ const OrderListTable = () => {
   }, []);
 
   // ── Edit helpers ───────────────────────────────────────────────────────────
-  const openEditModal = (order) => { setEditOrder(order); setShowEditModal(true); };
+  const [orderEditError, setOrderEditError] = useState('');
+  const openEditModal = (order) => { setEditOrder(order); setOrderEditError(''); setShowEditModal(true); };
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditOrder((prev) => ({ ...prev, [name]: value }));
+    if (name === 'totalAmount' && orderEditError) setOrderEditError('');
   };
   const handleUpdateOrder = async () => {
+    if (editOrder.totalAmount === '' || editOrder.totalAmount === null || Number(editOrder.totalAmount) <= 0) {
+      setOrderEditError('Total amount is required and must be greater than 0');
+      return;
+    }
+    setOrderEditError('');
     const token = localStorage.getItem("token");
     try {
       await axiosInstance.put(`/update-order/${editOrder._id}`, editOrder, {
@@ -87,7 +96,7 @@ const OrderListTable = () => {
       setShowEditModal(false);
       Swal.fire("Success", "Order updated successfully", "success");
     } catch (err) {
-      Swal.fire("Error", "Failed to update order", "error");
+      Swal.fire("Error", err.response?.data?.message || "Failed to update order", "error");
     }
   };
 
@@ -347,35 +356,60 @@ const OrderListTable = () => {
 
   // ── Apply the active date/week filter to the order list ─────────────────
   const filteredOrders = useMemo(() => {
-    if (dateFilterMode === "all") return orderList;
+    let result = orderList;
 
-    let from, to;
-    switch (dateFilterMode) {
-      case "today":     [from, to] = getDayRange(0); break;
-      case "thisWeek":  [from, to] = getWeekRange(0); break;
-      case "lastWeek":  [from, to] = getWeekRange(-1); break;
-      case "thisMonth": [from, to] = getMonthRange(0); break;
-      case "last30":    [from, to] = getLastNDaysRange(30); break;
-      case "custom":
-        if (!customFrom && !customTo) return orderList;
-        from = customFrom ? new Date(`${customFrom}T00:00:00`) : new Date(0);
-        to = customTo ? new Date(`${customTo}T23:59:59`) : new Date();
-        break;
-      default:
-        return orderList;
+    // Date filter (existing logic)
+    if (dateFilterMode !== "all") {
+      let from, to;
+      switch (dateFilterMode) {
+        case "today":     [from, to] = getDayRange(0); break;
+        case "thisWeek":  [from, to] = getWeekRange(0); break;
+        case "lastWeek":  [from, to] = getWeekRange(-1); break;
+        case "thisMonth": [from, to] = getMonthRange(0); break;
+        case "last30":    [from, to] = getLastNDaysRange(30); break;
+        case "custom":
+          if (customFrom || customTo) {
+            from = customFrom ? new Date(`${customFrom}T00:00:00`) : new Date(0);
+            to = customTo ? new Date(`${customTo}T23:59:59`) : new Date();
+          }
+          break;
+        default:
+          break;
+      }
+      if (from && to) {
+        result = result.filter((o) => {
+          const d = new Date(o.orderDate || o.createdAt);
+          return d >= from && d <= to;
+        });
+      }
     }
 
-    return orderList.filter((o) => {
-      const d = new Date(o.orderDate || o.createdAt);
-      return d >= from && d <= to;
-    });
-  }, [orderList, dateFilterMode, customFrom, customTo]);
+    // Status filter
+    if (orderStatusFilter) {
+      result = result.filter((o) => o.orderStatus === orderStatusFilter);
+    }
+
+    // Search filter (order ID, email, customer name)
+    if (orderSearchTerm.trim()) {
+      const term = orderSearchTerm.trim().toLowerCase();
+      result = result.filter((o) => {
+        const fullName = `${o.shippingAddress?.firstName || ""} ${o.shippingAddress?.lastName || ""}`.toLowerCase();
+        return (
+          o.orderId?.toLowerCase().includes(term) ||
+          o.email?.toLowerCase().includes(term) ||
+          fullName.includes(term)
+        );
+      });
+    }
+
+    return result;
+  }, [orderList, dateFilterMode, customFrom, customTo, orderStatusFilter, orderSearchTerm]);
 
   // Jump back to page 1 whenever the active filter changes so the user
   // doesn't land on an empty/out-of-range page.
   useEffect(() => {
     setCurrentPage(1);
-  }, [dateFilterMode, customFrom, customTo]);
+  }, [dateFilterMode, customFrom, customTo, orderStatusFilter, orderSearchTerm]);
 
   // ── Pagination ─────────────────────────────────────────────────────────────
   const indexOfLastData  = currentPage * dataPerPage;
@@ -397,6 +431,30 @@ const OrderListTable = () => {
       <OverlayScrollbarsComponent>
         {/* ── Date / week filter ─────────────────────────────────────────── */}
         <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
+          <div className="input-group input-group-sm" style={{ maxWidth: '260px' }}>
+            <span className="input-group-text bg-transparent"><i className="fa-light fa-magnifying-glass"></i></span>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search order ID, name, or email..."
+              value={orderSearchTerm}
+              onChange={(e) => setOrderSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <select
+            className="form-select form-select-sm w-auto"
+            value={orderStatusFilter}
+            onChange={(e) => setOrderStatusFilter(e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+
           <select
             className="form-select form-select-sm w-auto"
             value={dateFilterMode}
@@ -431,10 +489,10 @@ const OrderListTable = () => {
             </>
           )}
 
-          {dateFilterMode !== "all" && (
+          {(dateFilterMode !== "all" || orderStatusFilter || orderSearchTerm) && (
             <button
               className="btn btn-sm btn-link text-decoration-none"
-              onClick={() => { setDateFilterMode("all"); setCustomFrom(""); setCustomTo(""); }}
+              onClick={() => { setDateFilterMode("all"); setCustomFrom(""); setCustomTo(""); setOrderStatusFilter(""); setOrderSearchTerm(""); }}
             >
               Clear filter
             </button>
@@ -602,8 +660,9 @@ const OrderListTable = () => {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Total Amount (₹)</Form.Label>
-              <Form.Control type="number" name="totalAmount" value={editOrder.totalAmount} onChange={handleEditChange} />
+              <Form.Label>Total Amount (₹) <span className="text-danger">*</span></Form.Label>
+              <Form.Control type="number" name="totalAmount" value={editOrder.totalAmount} onChange={handleEditChange} isInvalid={!!orderEditError} min="0" />
+              <Form.Control.Feedback type="invalid">{orderEditError}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Payment Method</Form.Label>

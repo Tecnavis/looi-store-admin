@@ -11,6 +11,9 @@ const AllCustomerTable = () => {
   const [dataPerPage] = useState(15);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [customerErrors, setCustomerErrors] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -32,11 +35,26 @@ const AllCustomerTable = () => {
 
   const handleEdit = (user) => {
     setSelectedUser(user);
+    setCustomerErrors({});
     setShowEditModal(true);
+  };
+
+  const validateCustomer = (user) => {
+    const errors = {};
+    if (!user.fullName || !user.fullName.trim()) errors.fullName = 'Full name is required';
+    if (!user.username || !user.username.trim()) errors.username = 'Username is required';
+    if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) errors.email = 'Enter a valid email address';
+    return errors;
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    const errors = validateCustomer(selectedUser);
+    if (Object.keys(errors).length > 0) {
+      setCustomerErrors(errors);
+      return;
+    }
+    setCustomerErrors({});
     const token = localStorage.getItem('token');
     try {
       const response = await axiosInstance.put(`/update-user/${selectedUser._id}`, selectedUser, {
@@ -52,12 +70,14 @@ const AllCustomerTable = () => {
       setSelectedUser(null);
     } catch (err) {
       console.log('Error updating user', err);
+      setCustomerErrors({ submit: err.response?.data?.message || 'Failed to update customer' });
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+    if (customerErrors[name]) setCustomerErrors((prev) => ({ ...prev, [name]: undefined }));
+
     if (name.startsWith('address')) {
       const [_, index, field] = name.split('.');
       setSelectedUser((prev) => {
@@ -90,20 +110,50 @@ const AllCustomerTable = () => {
 
   const indexOfLastData = currentPage * dataPerPage;
   const indexOfFirstData = indexOfLastData - dataPerPage;
-  const currentData = customers.slice(indexOfFirstData, indexOfLastData);
+
+  const filteredCustomers = customers.filter((c) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      c.fullName?.toLowerCase().includes(term) ||
+      c.username?.toLowerCase().includes(term) ||
+      c.email?.toLowerCase().includes(term) ||
+      c.address?.[0]?.cityDistrict?.toLowerCase().includes(term) ||
+      c.address?.[0]?.phoneNumber?.toLowerCase().includes(term)
+    );
+  });
+
+  const sortedCustomers = [...filteredCustomers].sort((a, b) => {
+    switch (sortBy) {
+      case 'nameAZ': return (a.fullName || '').localeCompare(b.fullName || '');
+      case 'nameZA': return (b.fullName || '').localeCompare(a.fullName || '');
+      case 'oldest': return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      case 'newest':
+      default:
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    }
+  });
+
+  const currentData = sortedCustomers.slice(indexOfFirstData, indexOfLastData);
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  const totalPages = Math.ceil(customers.length / dataPerPage);
+  const totalPages = Math.ceil(sortedCustomers.length / dataPerPage);
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
 
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setSortBy('newest');
+    setCurrentPage(1);
+  };
+
   const displayData = (data) => (data ? data : 'Nil');
   const handleDownload = () => {
-    const formattedData = customers.map((customer) => ({
+    const formattedData = sortedCustomers.map((customer) => ({
       FullName: customer.fullName || 'Nil',
       Username: customer.username || 'Nil',
       Email: customer.email || 'Nil',
@@ -129,6 +179,43 @@ const AllCustomerTable = () => {
         <button className="btn btn-sm btn-success" onClick={handleDownload}>Download</button>
         </div>
         <br/>
+
+        {/* ── Filter bar ── */}
+        <div className="row g-2 align-items-center mb-3">
+          <div className="col-lg-4 col-md-6 col-12">
+            <div className="input-group input-group-sm">
+              <span className="input-group-text bg-transparent"><i className="fa-light fa-magnifying-glass"></i></span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search by name, username, email, city, or phone..."
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              />
+            </div>
+          </div>
+          <div className="col-lg-2 col-md-6 col-6">
+            <select className="form-select form-select-sm" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="nameAZ">Name: A-Z</option>
+              <option value="nameZA">Name: Z-A</option>
+            </select>
+          </div>
+          {searchTerm && (
+            <div className="col-lg-2 col-md-6 col-6">
+              <button className="btn btn-sm btn-outline-secondary w-100" onClick={handleResetFilters}>
+                <i className="fa-light fa-rotate-left"></i> Reset
+              </button>
+            </div>
+          )}
+          {searchTerm && (
+            <div className="col-12">
+              <p className="text-muted small mb-0">Showing {sortedCustomers.length} of {customers.length} customers</p>
+            </div>
+          )}
+        </div>
+
         <Table className="table table-dashed table-hover digi-dataTable all-product-table table-striped">
           <thead>
             <tr>
@@ -155,7 +242,11 @@ const AllCustomerTable = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.map((data) => (
+            {sortedCustomers.length === 0 ? (
+              <tr><td colSpan="12" className="text-center py-4 text-muted">
+                {customers.length === 0 ? 'No customers yet.' : 'No customers match your search.'}
+              </td></tr>
+            ) : currentData.map((data) => (
               <tr key={data._id}>
                 <td>
                   <div className="form-check">
@@ -211,24 +302,31 @@ const AllCustomerTable = () => {
         <Modal.Body>
           {selectedUser && (
             <Form onSubmit={handleUpdate}>
+              {customerErrors.submit && (
+                <div className="alert alert-danger py-2" style={{ fontSize: '13px' }}>{customerErrors.submit}</div>
+              )}
               <Form.Group>
-                <Form.Label>Full Name</Form.Label>
+                <Form.Label>Full Name <span className="text-danger">*</span></Form.Label>
                 <Form.Control
                   type="text"
                   name="fullName"
                   value={selectedUser.fullName || ""}
                   onChange={handleChange}
+                  isInvalid={!!customerErrors.fullName}
                 />
+                <Form.Control.Feedback type="invalid">{customerErrors.fullName}</Form.Control.Feedback>
               </Form.Group>
               <br />
               <Form.Group>
-                <Form.Label>User Name</Form.Label>
+                <Form.Label>User Name <span className="text-danger">*</span></Form.Label>
                 <Form.Control
                   type="text"
                   name="username"
                   value={selectedUser.username || ""}
                   onChange={handleChange}
+                  isInvalid={!!customerErrors.username}
                 />
+                <Form.Control.Feedback type="invalid">{customerErrors.username}</Form.Control.Feedback>
               </Form.Group>
               <br />
               <Form.Group>
@@ -238,7 +336,9 @@ const AllCustomerTable = () => {
                   name="email"
                   value={selectedUser.email || ""}
                   onChange={handleChange}
+                  isInvalid={!!customerErrors.email}
                 />
+                <Form.Control.Feedback type="invalid">{customerErrors.email}</Form.Control.Feedback>
               </Form.Group>
               <br />
               <Form.Group>

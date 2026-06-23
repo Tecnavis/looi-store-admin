@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Footer from '../../components/footer/Footer'
 import AllProductHeader from '../../components/header/AllProductHeader'
-import AllProductTableFilter from '../../components/filter/AllProductTableFilter'
 import AllProductTable from '../../components/tables/AllProductTable'
-import HeaderBtn from '../../components/header/HeaderBtn'
 import { Spinner } from 'react-bootstrap'; 
 
 
@@ -33,8 +31,6 @@ const AllProductMainContent = () => {
                 <div className="panel">
                     <AllProductHeader/>
                     <div className="panel-body">
-                        {/* <HeaderBtn/> */}
-                        {/* <AllProductTableFilter/> */}
                         <AllProductTable/>
                     </div>
                 </div>
