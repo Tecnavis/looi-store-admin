@@ -54,6 +54,7 @@ const OrderListTable = () => {
   const [customTo, setCustomTo]             = useState("");
   const [orderSearchTerm, setOrderSearchTerm] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("");
+  const [orderPaymentFilter, setOrderPaymentFilter] = useState(""); // "" | "cod" | "prepaid"
 
   // ── Fetch orders ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -281,16 +282,29 @@ const OrderListTable = () => {
     });
   };
 
+  // True if the order's payment method is Cash on Delivery (matches "COD" or
+  // "Cash on Delivery" in any casing — the storefront isn't guaranteed to send
+  // a fixed enum value, so this stays loose on purpose).
+  const isCOD = (order) => /cod|cash\s*on\s*delivery/i.test(order.paymentMethod || "");
+
   // ── Excel export ───────────────────────────────────────────────────────────
   const handleDownloadExcel = () => {
     // Selecting specific rows always wins; otherwise export whatever the
-    // active date/week filter currently shows (not the entire unfiltered list).
+    // active filters (date/status/payment/search) currently show — not the
+    // entire unfiltered list. This is what lets "COD only" or "Prepaid only"
+    // scope the download.
     const ordersToExport = selectedOrderIds.size > 0
       ? orderList.filter((o) => selectedOrderIds.has(o._id))
       : filteredOrders;
 
     const formattedData = ordersToExport.map((order) => {
       const a = order.shippingAddress || {};
+      const cod = isCOD(order);
+      // Total order weight in kg, summed across every line item (qty × per-unit weight).
+      const totalWeightKg = (order.orderItems || []).reduce(
+        (sum, i) => sum + (Number(i.weight) || 0) * (Number(i.quantity) || 1),
+        0
+      );
       return {
         "Order ID":       order.orderId,
         "Addressee":      [a.firstName, a.lastName].filter(Boolean).join(" ") || order.user?.name || "N/A",
@@ -304,7 +318,9 @@ const OrderListTable = () => {
         "Pincode":        a.postalCode || "N/A",
         "Order Status":   order.orderStatus,
         "Items":          (order.orderItems || []).map((i) => `${i.quantity}x ${i.productName} (${i.size||''} ${i.color||''})`).join(" | "),
+        "Weight (kg)":    totalWeightKg > 0 ? totalWeightKg.toFixed(2) : "N/A",
         "Total":          `Rs.${order.totalAmount}`,
+        "COD":            cod ? order.totalAmount : "",
         "Payment Method": order.paymentMethod,
         "Payment Status": order.paymentStatus,
         "Order Date":     new Date(order.orderDate).toLocaleDateString(),
@@ -389,6 +405,13 @@ const OrderListTable = () => {
       result = result.filter((o) => o.orderStatus === orderStatusFilter);
     }
 
+    // Payment method filter (COD vs Prepaid) — used mainly to scope the Excel export
+    if (orderPaymentFilter === "cod") {
+      result = result.filter((o) => isCOD(o));
+    } else if (orderPaymentFilter === "prepaid") {
+      result = result.filter((o) => !isCOD(o));
+    }
+
     // Search filter (order ID, email, customer name)
     if (orderSearchTerm.trim()) {
       const term = orderSearchTerm.trim().toLowerCase();
@@ -403,13 +426,13 @@ const OrderListTable = () => {
     }
 
     return result;
-  }, [orderList, dateFilterMode, customFrom, customTo, orderStatusFilter, orderSearchTerm]);
+  }, [orderList, dateFilterMode, customFrom, customTo, orderStatusFilter, orderPaymentFilter, orderSearchTerm]);
 
   // Jump back to page 1 whenever the active filter changes so the user
   // doesn't land on an empty/out-of-range page.
   useEffect(() => {
     setCurrentPage(1);
-  }, [dateFilterMode, customFrom, customTo, orderStatusFilter, orderSearchTerm]);
+  }, [dateFilterMode, customFrom, customTo, orderStatusFilter, orderPaymentFilter, orderSearchTerm]);
 
   // ── Pagination ─────────────────────────────────────────────────────────────
   const indexOfLastData  = currentPage * dataPerPage;
@@ -457,6 +480,17 @@ const OrderListTable = () => {
 
           <select
             className="form-select form-select-sm w-auto"
+            value={orderPaymentFilter}
+            onChange={(e) => setOrderPaymentFilter(e.target.value)}
+            title="Filter by payment method — also scopes the Excel download"
+          >
+            <option value="">All Payment Methods</option>
+            <option value="cod">COD Only</option>
+            <option value="prepaid">Prepaid Only</option>
+          </select>
+
+          <select
+            className="form-select form-select-sm w-auto"
             value={dateFilterMode}
             onChange={(e) => setDateFilterMode(e.target.value)}
           >
@@ -489,10 +523,10 @@ const OrderListTable = () => {
             </>
           )}
 
-          {(dateFilterMode !== "all" || orderStatusFilter || orderSearchTerm) && (
+          {(dateFilterMode !== "all" || orderStatusFilter || orderPaymentFilter || orderSearchTerm) && (
             <button
               className="btn btn-sm btn-link text-decoration-none"
-              onClick={() => { setDateFilterMode("all"); setCustomFrom(""); setCustomTo(""); setOrderStatusFilter(""); setOrderSearchTerm(""); }}
+              onClick={() => { setDateFilterMode("all"); setCustomFrom(""); setCustomTo(""); setOrderStatusFilter(""); setOrderPaymentFilter(""); setOrderSearchTerm(""); }}
             >
               Clear filter
             </button>
@@ -508,6 +542,9 @@ const OrderListTable = () => {
             <button className="btn btn-sm btn-success" onClick={handleDownloadExcel}>
               ⬇ Download Excel{selectedOrderIds.size > 0 ? ` (${selectedOrderIds.size} selected)` : ""}
             </button>
+            {selectedOrderIds.size === 0 && (orderPaymentFilter || orderStatusFilter || dateFilterMode !== "all" || orderSearchTerm) && (
+              <span className="text-muted small">Exports the {filteredOrders.length} filtered order{filteredOrders.length !== 1 ? "s" : ""} above</span>
+            )}
             {selectedOrderIds.size > 0 && (
               <button
                 className="btn btn-sm btn-link text-decoration-none"

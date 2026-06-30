@@ -6,22 +6,17 @@ import axiosInstance from '../../../axiosConfig';
 import EditProduct from '../../pages/products/editproduct';
 import Swal from 'sweetalert2';
 
-// Computes the real total stock straight from sizes/colors instead of trusting
-// a possibly-stale stored `totalStock` field (e.g. if it was set before a manual
-// DB edit, or a save path that skipped the pre-save hook).
-const computeTotalStock = (data) => {
-  if (!Array.isArray(data.sizes)) return data.totalStock || 0;
-  return data.sizes.reduce(
-    (sum, size) => sum + (size.colors || []).reduce((s, c) => s + (Number(c.stock) || 0), 0),
-    0
-  );
-};
-
-// Per-row component. Sizes/colors + stock are now shown as a plain stacked
-// list (no dropdowns to click through) so stock is visible at a glance.
+// Per-row component so each row has its own size/color state (fixes shared-state bug)
 const ProductRow = ({ data, onEdit, onDelete }) => {
-  const liveTotalStock = computeTotalStock(data);
-  const inStock = liveTotalStock > 0;
+  const [selectedSize, setSelectedSize] = useState('');
+  const [availableColors, setAvailableColors] = useState([]);
+
+  const handleSizeChange = (e) => {
+    const sizeName = e.target.value;
+    if (!sizeName) { setSelectedSize(''); setAvailableColors([]); return; }
+    const found = data.sizes?.find((s) => s.size === sizeName);
+    if (found) { setSelectedSize(found.size); setAvailableColors(found.colors); }
+  };
 
   const handleView = () => {
     Swal.fire({
@@ -30,8 +25,8 @@ const ProductRow = ({ data, onEdit, onDelete }) => {
         <div style="text-align:left;font-size:14px;line-height:1.7">
           <p><strong>Product ID:</strong> ${data.productId}</p>
           <p><strong>Price:</strong> ₹${data.price}</p>
-          <p><strong>Total Stock:</strong> ${liveTotalStock}</p>
-          <p><strong>Status:</strong> ${inStock ? '<span style="color:#198754">In Stock</span>' : '<span style="color:#dc3545">Out of Stock</span>'}</p>
+          <p><strong>Total Stock:</strong> ${data.totalStock}</p>
+          <p><strong>Status:</strong> ${data.totalStock > 0 ? '<span style="color:#198754">In Stock</span>' : '<span style="color:#dc3545">Out of Stock</span>'}</p>
           ${data.coverImage ? `<img src="${data.coverImage}" alt="cover" style="width:100px;height:130px;object-fit:cover;border-radius:6px;margin-top:8px;"/>` : ''}
         </div>`,
       confirmButtonText: 'Close',
@@ -52,24 +47,25 @@ const ProductRow = ({ data, onEdit, onDelete }) => {
       <td>₹{data.price}</td>
       <td>
         {data.sizes && data.sizes.length > 0
-          ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '170px' }}>
-              {data.sizes.map((size, i) =>
-                (size.colors || []).map((color, j) => (
-                  <span key={`${i}-${j}`} style={{ fontSize: '12px', whiteSpace: 'nowrap' }}>
-                    <strong>{size.size}</strong>
-                    {color.color ? ` - ${color.color}` : ''}
-                    : {color.stock ?? 0}
-                  </span>
-                ))
-              )}
-            </div>
-          )
+          ? (<select className="form-select form-select-sm" value={selectedSize} onChange={handleSizeChange}>
+              <option value="">Select Size</option>
+              {data.sizes.map((size, i) => <option key={i} value={size.size}>{size.size}</option>)}
+            </select>)
           : <span className="text-muted" style={{ fontSize: '12px' }}>N/A</span>}
       </td>
-      <td>{liveTotalStock}</td>
       <td>
-        {inStock
+        {availableColors.length > 0
+          ? (<select className="form-select form-select-sm">
+              <option value="">Select Color</option>
+              {availableColors.map((color, i) => (
+                <option key={i} value={color.color}>{color.color} (Stock: {color.stock})</option>
+              ))}
+            </select>)
+          : <span className="text-muted" style={{ fontSize: '12px' }}>{selectedSize ? 'No Colors' : '—'}</span>}
+      </td>
+      <td>{data.totalStock}</td>
+      <td>
+        {data.totalStock > 0
           ? <span className="badge bg-success">In Stock</span>
           : <span className="badge bg-danger">Out of Stock</span>}
       </td>
@@ -182,11 +178,10 @@ const AllProductTable = () => {
 
     const matchesCategory = !categoryFilter || getMainCategoryId(p) === categoryFilter;
 
-    const liveStock = computeTotalStock(p);
     const matchesStock =
       !stockFilter ||
-      (stockFilter === 'in' && liveStock > 0) ||
-      (stockFilter === 'out' && liveStock <= 0);
+      (stockFilter === 'in' && p.totalStock > 0) ||
+      (stockFilter === 'out' && p.totalStock <= 0);
 
     return matchesSearch && matchesCategory && matchesStock;
   });
@@ -196,7 +191,7 @@ const AllProductTable = () => {
       case 'priceLow': return (a.price || 0) - (b.price || 0);
       case 'priceHigh': return (b.price || 0) - (a.price || 0);
       case 'nameAZ': return (a.name || '').localeCompare(b.name || '');
-      case 'stockLow': return computeTotalStock(a) - computeTotalStock(b);
+      case 'stockLow': return (a.totalStock || 0) - (b.totalStock || 0);
       case 'newest':
       default:
         return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
@@ -309,7 +304,8 @@ const AllProductTable = () => {
               <th>Product Id</th>
               <th>Name</th>
               <th>Price</th>
-              <th>Sizes / Colors &amp; Stock</th>
+              <th>Sizes</th>
+              <th>Colors &amp; Stock</th>
               <th>Total Stock</th>
               <th>Stock Status</th>
               <th>Actions</th>
@@ -317,7 +313,7 @@ const AllProductTable = () => {
           </thead>
           <tbody>
             {filteredProducts.length === 0
-              ? (<tr><td colSpan="9" className="text-center py-4 text-muted">
+              ? (<tr><td colSpan="10" className="text-center py-4 text-muted">
                   {products.length === 0 ? 'No products have been added yet.' : 'No products match the current filters.'}
                 </td></tr>)
               : currentData.map((data) => (
