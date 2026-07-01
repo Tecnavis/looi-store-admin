@@ -81,6 +81,13 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'weightGrams') {
+      // Displayed/entered in grams; formData.weight stays in kg internally
+      // since that's what the server schema and Shiprocket integration expect.
+      setFormData((prev) => ({ ...prev, weight: value === '' ? '' : Number(value) / 1000 }));
+      if (fieldErrors.weight) setFieldErrors((prev) => ({ ...prev, weight: undefined }));
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
   };
@@ -347,8 +354,16 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
                     <Form.Control.Feedback type="invalid">{fieldErrors.height}</Form.Control.Feedback>
                   </Col>
                   <Col md={3}>
-                    <Form.Label className="fw-medium">Weight (kg)</Form.Label>
-                    <Form.Control type="number" name="weight" value={formData.weight} onChange={handleChange} isInvalid={!!fieldErrors.weight} min="0" step="0.01" />
+                    <Form.Label className="fw-medium">Weight (g)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="weightGrams"
+                      value={formData.weight === '' ? '' : Math.round(Number(formData.weight) * 1000)}
+                      onChange={handleChange}
+                      isInvalid={!!fieldErrors.weight}
+                      min="0"
+                      step="1"
+                    />
                     <Form.Control.Feedback type="invalid">{fieldErrors.weight}</Form.Control.Feedback>
                   </Col>
                 </Row>

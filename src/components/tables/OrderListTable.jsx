@@ -300,9 +300,10 @@ const OrderListTable = () => {
     const formattedData = ordersToExport.map((order) => {
       const a = order.shippingAddress || {};
       const cod = isCOD(order);
-      // Total order weight in kg, summed across every line item (qty × per-unit weight).
-      const totalWeightKg = (order.orderItems || []).reduce(
-        (sum, i) => sum + (Number(i.weight) || 0) * (Number(i.quantity) || 1),
+      // Total order weight in grams, summed across every line item (qty × per-unit weight).
+      // Product weight is stored in kg in the database, so it's converted here for display.
+      const totalWeightG = (order.orderItems || []).reduce(
+        (sum, i) => sum + (Number(i.weight) || 0) * 1000 * (Number(i.quantity) || 1),
         0
       );
       return {
@@ -318,7 +319,7 @@ const OrderListTable = () => {
         "Pincode":        a.postalCode || "N/A",
         "Order Status":   order.orderStatus,
         "Items":          (order.orderItems || []).map((i) => `${i.quantity}x ${i.productName} (${i.size||''} ${i.color||''})`).join(" | "),
-        "Weight (kg)":    totalWeightKg > 0 ? totalWeightKg.toFixed(2) : "N/A",
+        "Weight (g)":     totalWeightG > 0 ? Math.round(totalWeightG) : "N/A",
         "Total":          `Rs.${order.totalAmount}`,
         "COD":            cod ? order.totalAmount : "",
         "Payment Method": order.paymentMethod,

@@ -6,7 +6,7 @@ const ShippingInfoPane = () => {
     <form>
         <div className="row g-3 mb-3">
             <label className="col-md-2 col-form-label col-form-label-sm">
-                Weight (kg) 
+                Weight (g) 
                 <span 
                 className="btn-flush fs-14" 
                 data-tooltip-id="my-tooltip"

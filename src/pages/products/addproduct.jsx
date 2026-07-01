@@ -74,6 +74,14 @@ const AddProduct = () => {
     if (error[name]) setError((prev) => ({ ...prev, [name]: undefined }));
     if (name === 'currentSize') {
       setCurrentSize(value);
+    } else if (name === 'weightGrams') {
+      // Displayed/entered in grams, stored internally (and sent to the server) in kg —
+      // the backend schema and Shiprocket integration both expect kilograms.
+      if (error.weight) setError((prev) => ({ ...prev, weight: undefined }));
+      setFormData((prev) => ({
+        ...prev,
+        weight: value === '' ? '' : (Number(value) / 1000).toString(),
+      }));
     } else if (name === 'subcategory') {
       const selectedSubcategory = subCategories.find((sub) => sub._id === value);
       if (selectedSubcategory) {
@@ -426,8 +434,18 @@ const AddProduct = () => {
                 {error.length && <div className="invalid-feedback">{error.length}</div>}
               </div>
               <div className="col-md-3">
-                <label className="form-label fw-medium">Weight (kg) <span className="text-danger">*</span></label>
-                <input type="number" className={`form-control ${error.weight ? 'is-invalid' : ''}`} name="weight" value={formData.weight} onChange={handleChange} placeholder="0" min="0" step="0.01" required />
+                <label className="form-label fw-medium">Weight (g) <span className="text-danger">*</span></label>
+                <input
+                  type="number"
+                  className={`form-control ${error.weight ? 'is-invalid' : ''}`}
+                  name="weightGrams"
+                  value={formData.weight === '' ? '' : Math.round(Number(formData.weight) * 1000)}
+                  onChange={handleChange}
+                  placeholder="0"
+                  min="0"
+                  step="1"
+                  required
+                />
                 {error.weight && <div className="invalid-feedback">{error.weight}</div>}
               </div>
 
