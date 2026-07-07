@@ -5,6 +5,11 @@ import { Form } from 'react-bootstrap'
 const InvoicesMainContent = () => {
   return (
     <div className="main-content">
+    <style>{`
+        #invoiceBody, #invoiceBody * {
+            color: #000 !important;
+        }
+    `}</style>
     <div className="dashboard-breadcrumb dashboard-panel-header mb-30">
         <h2>Invoices</h2>
     </div>
