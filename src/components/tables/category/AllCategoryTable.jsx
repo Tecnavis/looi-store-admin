@@ -57,6 +57,41 @@ const AllCategoryTable = () => {
         );
     };
 
+    const handleToggleBestSeller = async (category) => {
+        const token = localStorage.getItem('token');
+        const nextValue = !category.isBestSeller;
+
+        // Optimistic UI update
+        setProducts((prev) =>
+            prev.map((c) => (c._id === category._id ? { ...c, isBestSeller: nextValue } : c))
+        );
+
+        try {
+            await axiosInstance.put(
+                `/update-category-bestseller/${category._id}`,
+                { isBestSeller: nextValue },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+        } catch (err) {
+            console.error('Error updating best seller flag:', err);
+            // Revert on failure
+            setProducts((prev) =>
+                prev.map((c) => (c._id === category._id ? { ...c, isBestSeller: !nextValue } : c))
+            );
+            Swal.fire({
+                text: 'Failed to update Best Seller status: ' + (err.response ? err.response.data.message : err.message),
+                icon: 'error',
+                confirmButtonClass: 'btn btn-sm btn-primary',
+                buttonsStyling: false,
+            });
+        }
+    };
+
     const handleDelete = async (id) => {
         const result = await Swal.fire({
             title: 'Are you sure?',
@@ -130,6 +165,7 @@ const AllCategoryTable = () => {
                                 </div>
                             </th>
                             <th>Main Category</th>
+                            <th>Best Seller</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -149,6 +185,18 @@ const AllCategoryTable = () => {
                                     </div>
                                 </td>
                                 <td>{data.name || 'N/A'}</td>
+                                <td>
+                                    <div className="form-check form-switch">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            role="switch"
+                                            checked={!!data.isBestSeller}
+                                            onChange={() => handleToggleBestSeller(data)}
+                                            title="Show this category in the Best Sellers section"
+                                        />
+                                    </div>
+                                </td>
                                 <td>
                                     <div className="btn-box">
                                         <button onClick={() => handleEditButtonClick(data)}>
