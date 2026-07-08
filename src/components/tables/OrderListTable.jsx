@@ -187,7 +187,7 @@ const OrderListTable = () => {
       const lineTaxAmt = lineTotal - (unitExclTax * qty);
       return `<tr style="background:${i % 2 === 0 ? '#f9f9f9' : '#fff'}">
         <td style="padding:7px 10px;border:1px solid #ddd;">${i + 1}</td>
-        <td style="padding:7px 10px;border:1px solid #ddd;">${item.productName}${item.size ? ` <small style="color:#888">(${item.size}${item.color ? '/' + item.color : ''})</small>` : ''}</td>
+        <td style="padding:7px 10px;border:1px solid #ddd;">${item.productName}${item.size ? ` <small style="color:#000">(${item.size}${item.color ? '/' + item.color : ''})</small>` : ''}</td>
         <td style="padding:7px 10px;border:1px solid #ddd;text-align:center;">${item.hsn || '—'}</td>
         <td style="padding:7px 10px;border:1px solid #ddd;text-align:center;">${qty}</td>
         <td style="padding:7px 10px;border:1px solid #ddd;text-align:right;">₹${unitExclTax.toFixed(2)}</td>
@@ -201,29 +201,29 @@ const OrderListTable = () => {
       <title>Invoice — ${order.orderId}</title>
       <style>
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:20px;}
+        body{font-family:Arial,sans-serif;font-size:12px;color:#000;padding:20px;}
         .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
-        .brand{font-size:24px;font-weight:900;letter-spacing:2px;}
-        .inv-title{font-size:20px;font-weight:700;text-align:right;}
-        .inv-meta{font-size:12px;color:#555;text-align:right;margin-top:4px;}
+        .brand img{height:42px;display:block;}
+        .inv-title{font-size:20px;font-weight:700;text-align:right;color:#000;}
+        .inv-meta{font-size:12px;color:#000;text-align:right;margin-top:4px;}
         hr{border:none;border-top:2px solid #000;margin:12px 0;}
         .section{display:flex;justify-content:space-between;margin-bottom:16px;}
         .block{width:48%;}
-        .block-title{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+        .block-title{font-size:10px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
         table{width:100%;border-collapse:collapse;margin-bottom:16px;}
         thead tr{background:#1a1a2e;color:#fff;}
         th{padding:8px 10px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;}
         .totals{width:300px;margin-left:auto;border:1px solid #ddd;}
-        .totals td{padding:7px 12px;border-bottom:1px solid #eee;font-size:12px;}
+        .totals td{padding:7px 12px;border-bottom:1px solid #eee;font-size:12px;color:#000;}
         .totals .grand td{font-weight:700;font-size:14px;background:#1a1a2e;color:#fff;}
-        .footer{margin-top:24px;padding-top:12px;border-top:1px solid #ccc;text-align:center;font-size:11px;color:#888;}
+        .footer{margin-top:24px;padding-top:12px;border-top:1px solid #ccc;text-align:center;font-size:11px;color:#000;}
         @media print{body{padding:10px;} .no-print{display:none;}}
       </style></head>
     <body>
       <div class="header">
-        <div>
-          <div class="brand">LOOI</div>
-          <div style="font-size:11px;color:#666;margin-top:4px;">www.looi.in | support@looi.in</div>
+        <div class="brand">
+          <img src="${LOOI_LOGO}" alt="LOOI"/>
+          <div style="font-size:11px;color:#000;margin-top:4px;">www.looi.in | support@looi.in</div>
         </div>
         <div>
           <div class="inv-title">TAX INVOICE</div>
