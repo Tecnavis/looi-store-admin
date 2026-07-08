@@ -34,6 +34,23 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
   const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'variants'
   const [editingCell, setEditingCell] = useState(null); // { sizeIndex, colorIndex, field }
   const [fieldErrors, setFieldErrors] = useState({});
+  const [subCategories, setSubCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await axiosInstance.get('/get-subcategory', {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        });
+        setSubCategories(res.data || []);
+      } catch (err) {
+        console.error('Error fetching subcategories:', err);
+      }
+    };
+    if (show) fetchSubCategories();
+  }, [show]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -45,6 +62,8 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const d = response.data.product;
+        const subcategoryId = d.subcategory && typeof d.subcategory === 'object' ? d.subcategory._id : (d.subcategory || '');
+        const maincategoryId = d.maincategory && typeof d.maincategory === 'object' ? d.maincategory._id : (d.maincategory || '');
         setFormData({
           name: d.name || '',
           price: d.price || 0,
@@ -56,8 +75,8 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
           countryOfOrigin: d.countryOfOrigin || '',
           manufacturer: d.manufacturer || '',
           packedBy: d.packedBy || '',
-          maincategory: d.maincategory || '',
-          subcategory: d.subcategory || '',
+          maincategory: maincategoryId,
+          subcategory: subcategoryId,
           totalStock: d.totalStock || 0,
           length: d.length || 0,
           width: d.width || 0,
@@ -75,9 +94,17 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
       setActiveTab('basic');
       setEditingCell(null);
       setFieldErrors({});
+      setSelectedCategory(null);
       fetchProduct();
     }
   }, [show, productId]);
+
+  useEffect(() => {
+    if (formData.subcategory && subCategories.length > 0) {
+      const match = subCategories.find((sub) => sub._id === formData.subcategory);
+      if (match) setSelectedCategory(match.category);
+    }
+  }, [formData.subcategory, subCategories]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,6 +113,23 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
       // since that's what the server schema and Shiprocket integration expect.
       setFormData((prev) => ({ ...prev, weight: value === '' ? '' : Number(value) / 1000 }));
       if (fieldErrors.weight) setFieldErrors((prev) => ({ ...prev, weight: undefined }));
+      return;
+    }
+    if (name === 'subcategory') {
+      const selectedSubcategory = subCategories.find((sub) => sub._id === value);
+      if (selectedSubcategory) {
+        setSelectedCategory(selectedSubcategory.category);
+        setFormData((prev) => ({
+          ...prev,
+          subcategory: value,
+          maincategory: selectedSubcategory.category.maincategoriesData,
+        }));
+        if (fieldErrors.maincategory) setFieldErrors((prev) => ({ ...prev, maincategory: undefined }));
+      } else {
+        setSelectedCategory(null);
+        setFormData((prev) => ({ ...prev, subcategory: value, maincategory: '' }));
+      }
+      if (fieldErrors.subcategory) setFieldErrors((prev) => ({ ...prev, subcategory: undefined }));
       return;
     }
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -155,6 +199,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
     const errors = {};
     if (!formData.name.trim()) errors.name = 'Product name is required';
     if (formData.price === '' || Number(formData.price) <= 0) errors.price = 'Price is required';
+    if (!formData.subcategory) errors.subcategory = 'Sub category is required';
     if (formData.length !== '' && Number(formData.length) < 0) errors.length = 'Length cannot be negative';
     if (formData.width !== '' && Number(formData.width) < 0) errors.width = 'Width cannot be negative';
     if (formData.height !== '' && Number(formData.height) < 0) errors.height = 'Height cannot be negative';
@@ -315,6 +360,20 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
                   <Form.Label className="fw-medium">Price (₹) <span className="text-danger">*</span></Form.Label>
                   <Form.Control type="number" name="price" value={formData.price} onChange={handleChange} isInvalid={!!fieldErrors.price} required min="0" />
                   <Form.Control.Feedback type="invalid">{fieldErrors.price}</Form.Control.Feedback>
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="fw-medium">Sub Category <span className="text-danger">*</span></Form.Label>
+                  <Form.Select name="subcategory" value={formData.subcategory} onChange={handleChange} isInvalid={!!fieldErrors.subcategory} required>
+                    <option value="">Select Sub Category</option>
+                    {subCategories.map((subcategory) => (
+                      <option key={subcategory._id} value={subcategory._id}>{subcategory.subcategoryname}</option>
+                    ))}
+                  </Form.Select>
+                  <Form.Control.Feedback type="invalid">{fieldErrors.subcategory}</Form.Control.Feedback>
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="fw-medium">Main Category</Form.Label>
+                  <Form.Control type="text" value={selectedCategory ? selectedCategory.name : ''} disabled placeholder="Auto-filled from sub category" />
                 </Col>
                 <Col md={6}>
                   <Form.Label className="fw-medium">Country of Origin</Form.Label>
