@@ -33,6 +33,9 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'variants'
   const [editingCell, setEditingCell] = useState(null); // { sizeIndex, colorIndex, field }
+  const [showAddVariant, setShowAddVariant] = useState(false);
+  const [newVariant, setNewVariant] = useState({ size: '', color: '', stock: '', imageFiles: [], imagePreviewUrls: [] });
+  const [addVariantError, setAddVariantError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [subCategories, setSubCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -95,6 +98,9 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
       setEditingCell(null);
       setFieldErrors({});
       setSelectedCategory(null);
+      setShowAddVariant(false);
+      setNewVariant({ size: '', color: '', stock: '', imageFiles: [], imagePreviewUrls: [] });
+      setAddVariantError('');
       fetchProduct();
     }
   }, [show, productId]);
@@ -185,6 +191,71 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
         })
         .filter((size) => size.colors.length > 0),
     }));
+  };
+
+  const handleNewVariantChange = (field, value) => {
+    setNewVariant((prev) => ({ ...prev, [field]: value }));
+    if (addVariantError) setAddVariantError('');
+  };
+
+  const handleNewVariantImages = (files) => {
+    const fileArray = Array.from(files);
+    setNewVariant((prev) => ({
+      ...prev,
+      imageFiles: fileArray,
+      imagePreviewUrls: fileArray.map((f) => URL.createObjectURL(f)),
+    }));
+  };
+
+  const handleAddVariant = () => {
+    const size = newVariant.size.trim();
+    const color = newVariant.color.trim();
+    const stock = parseInt(newVariant.stock) || 0;
+
+    if (!size || !color) {
+      setAddVariantError('Size and Color are both required.');
+      return;
+    }
+
+    // Prevent duplicate size+color combos
+    const duplicate = formData.sizes.some(
+      (s) =>
+        s.size.trim().toLowerCase() === size.toLowerCase() &&
+        s.colors.some((c) => c.color.trim().toLowerCase() === color.toLowerCase())
+    );
+    if (duplicate) {
+      setAddVariantError(`A variant with size "${size}" and color "${color}" already exists.`);
+      return;
+    }
+
+    setFormData((prev) => {
+      const existingSizeIndex = prev.sizes.findIndex(
+        (s) => s.size.trim().toLowerCase() === size.toLowerCase()
+      );
+      const newColorEntry = {
+        color,
+        stock,
+        images: [],
+        imageFiles: newVariant.imageFiles,
+        imagePreviewUrls: newVariant.imagePreviewUrls,
+      };
+
+      if (existingSizeIndex !== -1) {
+        // Size already exists — add this color under it
+        const updatedSizes = prev.sizes.map((s, i) =>
+          i === existingSizeIndex ? { ...s, colors: [...s.colors, newColorEntry] } : s
+        );
+        return { ...prev, sizes: updatedSizes };
+      }
+
+      // New size entirely
+      return { ...prev, sizes: [...prev.sizes, { size, colors: [newColorEntry] }] };
+    });
+
+    // Reset the form for the next entry
+    setNewVariant({ size: '', color: '', stock: '', imageFiles: [], imagePreviewUrls: [] });
+    setAddVariantError('');
+    setShowAddVariant(false);
   };
 
   const handleCoverImageChange = (e) => {
@@ -439,15 +510,105 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
           {/* ── TAB: VARIANTS ── */}
           {activeTab === 'variants' && (
             <div>
-              {/* Summary badges */}
-              {formData.sizes.length > 0 && (
-                <div className="d-flex gap-3 mb-3">
-                  <span className="badge bg-primary rounded-pill px-3 py-2">
-                    {totalVariants} variant{totalVariants !== 1 ? 's' : ''}
-                  </span>
-                  <span className="badge bg-success rounded-pill px-3 py-2">
-                    {totalStock} units total
-                  </span>
+              {/* Summary badges + Add Variant button */}
+              <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div className="d-flex gap-3">
+                  {formData.sizes.length > 0 && (
+                    <>
+                      <span className="badge bg-primary rounded-pill px-3 py-2">
+                        {totalVariants} variant{totalVariants !== 1 ? 's' : ''}
+                      </span>
+                      <span className="badge bg-success rounded-pill px-3 py-2">
+                        {totalStock} units total
+                      </span>
+                    </>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={() => setShowAddVariant((prev) => !prev)}
+                >
+                  <i className="fa-light fa-plus me-1"></i>Add Variant
+                </Button>
+              </div>
+
+              {showAddVariant && (
+                <div className="p-3 mb-3 rounded" style={{ background: 'rgba(3,127,224,0.06)', border: '1px solid rgba(3,127,224,0.25)' }}>
+                  <Row className="g-2 align-items-end">
+                    <Col md={3}>
+                      <Form.Label className="small fw-medium mb-1">Size</Form.Label>
+                      <Form.Control
+                        type="text"
+                        size="sm"
+                        placeholder="e.g. M"
+                        value={newVariant.size}
+                        onChange={(e) => handleNewVariantChange('size', e.target.value)}
+                      />
+                    </Col>
+                    <Col md={3}>
+                      <Form.Label className="small fw-medium mb-1">Color</Form.Label>
+                      <Form.Control
+                        type="text"
+                        size="sm"
+                        placeholder="e.g. Lavender"
+                        value={newVariant.color}
+                        onChange={(e) => handleNewVariantChange('color', e.target.value)}
+                      />
+                    </Col>
+                    <Col md={2}>
+                      <Form.Label className="small fw-medium mb-1">Stock</Form.Label>
+                      <Form.Control
+                        type="number"
+                        size="sm"
+                        min="0"
+                        placeholder="0"
+                        value={newVariant.stock}
+                        onChange={(e) => handleNewVariantChange('stock', e.target.value)}
+                      />
+                    </Col>
+                    <Col md={2}>
+                      <Form.Label className="small fw-medium mb-1">Images</Form.Label>
+                      <Form.Control
+                        type="file"
+                        size="sm"
+                        multiple
+                        accept=".jpg,.jpeg,.png"
+                        onChange={(e) => handleNewVariantImages(e.target.files)}
+                      />
+                    </Col>
+                    <Col md={2} className="d-flex gap-2">
+                      <Button type="button" variant="primary" size="sm" onClick={handleAddVariant} className="flex-fill">
+                        Add
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={() => {
+                          setShowAddVariant(false);
+                          setNewVariant({ size: '', color: '', stock: '', imageFiles: [], imagePreviewUrls: [] });
+                          setAddVariantError('');
+                        }}
+                      >
+                        <i className="fa-light fa-xmark"></i>
+                      </Button>
+                    </Col>
+                  </Row>
+                  {newVariant.imagePreviewUrls.length > 0 && (
+                    <div className="d-flex gap-2 mt-2">
+                      {newVariant.imagePreviewUrls.map((url, i) => (
+                        <img key={i} src={url} alt={`preview-${i}`} style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '6px' }} />
+                      ))}
+                    </div>
+                  )}
+                  {addVariantError && (
+                    <p className="text-danger small mt-2 mb-0">{addVariantError}</p>
+                  )}
+                  <p className="text-muted small mt-2 mb-0">
+                    If the size already exists, this color will be added under it; otherwise a new size row is created.
+                  </p>
                 </div>
               )}
 
