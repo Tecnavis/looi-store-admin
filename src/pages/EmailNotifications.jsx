@@ -6,6 +6,7 @@ const EmailNotifications = () => {
     const [adminEmails, setAdminEmails] = useState([]);
     const [inputEmail, setInputEmail] = useState('');
     const [notifyOnNewOrder, setNotifyOnNewOrder] = useState(true);
+    const [notifyOnOutOfStock, setNotifyOnOutOfStock] = useState(true);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [emailError, setEmailError] = useState('');
@@ -17,6 +18,7 @@ const EmailNotifications = () => {
                 const s = res.data.settings;
                 setAdminEmails(s.adminEmails || []);
                 setNotifyOnNewOrder(s.notifyOnNewOrder !== false);
+                setNotifyOnOutOfStock(s.notifyOnOutOfStock !== false);
             })
             .catch(() => {
                 Swal.fire('Error', 'Could not load notification settings.', 'error');
@@ -62,6 +64,7 @@ const EmailNotifications = () => {
             await axiosInstance.put('/notification-settings', {
                 adminEmails,
                 notifyOnNewOrder,
+                notifyOnOutOfStock,
             });
             Swal.fire({
                 icon: 'success',
@@ -148,6 +151,31 @@ const EmailNotifications = () => {
                                                 id="notifySwitch"
                                                 checked={notifyOnNewOrder}
                                                 onChange={e => setNotifyOnNewOrder(e.target.checked)}
+                                                style={{ width: 44, height: 22, cursor: 'pointer' }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Out of Stock Toggle */}
+                                    <div className="d-flex align-items-center justify-content-between p-3 mb-4 rounded-3"
+                                        style={{ background: 'var(--bs-light, #f8f9fa)', border: '1px solid var(--bs-border-color, #dee2e6)' }}>
+                                        <div>
+                                            <p className="mb-0 fw-semibold" style={{ fontSize: 14 }}>
+                                                <i className="fa-light fa-triangle-exclamation me-2 text-danger"></i>
+                                                Notify on Out of Stock
+                                            </p>
+                                            <p className="mb-0 text-muted" style={{ fontSize: 12 }}>
+                                                Send an alert to all admin emails the moment a product's stock hits zero.
+                                            </p>
+                                        </div>
+                                        <div className="form-check form-switch mb-0 ms-3">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="notifyOutOfStockSwitch"
+                                                checked={notifyOnOutOfStock}
+                                                onChange={e => setNotifyOnOutOfStock(e.target.checked)}
                                                 style={{ width: 44, height: 22, cursor: 'pointer' }}
                                             />
                                         </div>
@@ -274,6 +302,13 @@ const EmailNotifications = () => {
                                             bg: '#fffbeb',
                                             title: 'Admin Gets Notified',
                                             desc: 'All email addresses added here will receive a new order alert with full order details, customer info, and item list.'
+                                        },
+                                        {
+                                            icon: 'fa-triangle-exclamation',
+                                            color: '#cc3333',
+                                            bg: '#fef2f2',
+                                            title: 'Out-of-Stock Alerts',
+                                            desc: "When a product's stock hits zero — whether from an order or a manual edit — everyone on the list gets notified so it can be restocked quickly."
                                         },
                                         {
                                             icon: 'fa-shield-check',
