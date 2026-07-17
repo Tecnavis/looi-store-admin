@@ -9,6 +9,7 @@ const MySwal = withReactContent(Swal);
 const EditProduct = ({ show, handleClose, productId, onEdit }) => {
   const [formData, setFormData] = useState({
     name: '',
+    oldPrice: 0,
     price: 0,
     coverImage: '',
     sizes: [],
@@ -69,6 +70,7 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
         const maincategoryId = d.maincategory && typeof d.maincategory === 'object' ? d.maincategory._id : (d.maincategory || '');
         setFormData({
           name: d.name || '',
+          oldPrice: d.oldPrice || 0,
           price: d.price || 0,
           coverImage: d.coverImage || '',
           sizes: d.sizes || [],
@@ -426,6 +428,10 @@ const EditProduct = ({ show, handleClose, productId, onEdit }) => {
                   <Form.Label className="fw-medium">Product Name <span className="text-danger">*</span></Form.Label>
                   <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} isInvalid={!!fieldErrors.name} required />
                   <Form.Control.Feedback type="invalid">{fieldErrors.name}</Form.Control.Feedback>
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="fw-medium">Old Price (₹)</Form.Label>
+                  <Form.Control type="number" name="oldPrice" value={formData.oldPrice} onChange={handleChange} min="0" />
                 </Col>
                 <Col md={6}>
                   <Form.Label className="fw-medium">Price (₹) <span className="text-danger">*</span></Form.Label>
