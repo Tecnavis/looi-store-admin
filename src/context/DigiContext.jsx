@@ -1786,7 +1786,11 @@ const DigiContextProvider = ({ children }) => {
   const [hasCalculated, setHasCalculated] = useState(false);
   useEffect(() => {
     const handleKeydown = (e) => {
-      const isInputField = e.target.tagName === "INPUT"; // Check if the event is coming from an input field
+      const isInputField =
+        e.target.tagName === "INPUT" ||
+        e.target.tagName === "TEXTAREA" ||
+        e.target.tagName === "SELECT" ||
+        e.target.isContentEditable; // Check if the event is coming from any editable form field
 
       if (!isInputField) {
         if (
